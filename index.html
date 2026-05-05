@@ -41,6 +41,8 @@
   .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text);}
   .btn-outline:hover{border-color:var(--primary);color:var(--primary);}
   .btn-sm{padding:6px 12px;font-size:12px;}
+  .btn-print{background:linear-gradient(135deg,#1565C0,#1976D2);color:white;}
+  .btn-print:hover{background:linear-gradient(135deg,#0D47A1,#1565C0);}
 
   /* APP LAYOUT */
   #app{display:none;min-height:100vh;}
@@ -144,6 +146,42 @@
   .wa-preview{background:#e5ddd5;border-radius:12px;padding:16px;margin-top:12px;}
   .wa-bubble{background:white;border-radius:10px 10px 10px 0;padding:12px 14px;font-size:13px;color:#1a1a1a;box-shadow:0 1px 3px rgba(0,0,0,.1);max-width:90%;white-space:pre-wrap;line-height:1.5;}
   .wa-bubble-header{font-size:11px;color:#25D366;font-weight:700;margin-bottom:6px;}
+
+  /* ── TOKEN SLIP PRINT STYLES ── */
+  .token-slip-preview{
+    border:2px dashed var(--border);border-radius:12px;padding:20px;
+    background:linear-gradient(135deg,#f8fffe,#f0f8f4);margin-top:16px;
+  }
+  .token-slip-card{
+    background:white;border-radius:10px;padding:20px;
+    box-shadow:0 2px 12px rgba(0,0,0,.08);
+    border-top:5px solid var(--primary);
+  }
+  .slip-header{display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px dashed var(--border);margin-bottom:14px;}
+  .slip-emblem{width:44px;height:44px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .slip-title{font-size:13px;font-weight:700;color:var(--primary);line-height:1.3;}
+  .slip-subtitle{font-size:10px;color:var(--text-light);}
+  .slip-token-big{text-align:center;padding:12px 0;}
+  .slip-token-num{font-size:52px;font-weight:700;color:var(--primary);line-height:1;}
+  .slip-token-label{font-size:11px;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+  .slip-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0;}
+  .slip-detail-item{background:var(--bg);border-radius:6px;padding:8px 10px;}
+  .slip-detail-label{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;}
+  .slip-detail-value{font-size:13px;font-weight:600;color:var(--text);margin-top:2px;}
+  .slip-footer{text-align:center;font-size:11px;color:var(--text-light);padding-top:12px;border-top:1px dashed var(--border);}
+  .slip-qr-placeholder{width:60px;height:60px;background:var(--bg);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--text-light);text-align:center;margin:0 auto 6px;}
+
+  /* Print CSS — only token slip shows when printing */
+  @media print {
+    body * { visibility: hidden; }
+    #printTokenSlip, #printTokenSlip * { visibility: visible; }
+    #printTokenSlip {
+      position: fixed; left: 0; top: 0;
+      width: 80mm; /* Standard receipt width */
+      padding: 8mm;
+    }
+    .no-print { display: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -210,6 +248,9 @@
   </div>
 </div>
 
+<!-- ══ TOKEN PRINT SLIP (hidden, used for printing) ══ -->
+<div id="printTokenSlip" style="display:none;"></div>
+
 <!-- MODALS -->
 <!-- Consult Modal -->
 <div class="modal-overlay" id="consultModal">
@@ -223,6 +264,30 @@
       <button class="btn btn-outline" onclick="closeModal('consultModal')">Cancel</button>
       <button class="btn btn-whatsapp" onclick="sendConsultWA()">📱 Save & Send WhatsApp</button>
       <button class="btn btn-success" onclick="saveTreatment(false)">✓ Save Only</button>
+    </div>
+  </div>
+</div>
+
+<!-- Token Print Preview Modal -->
+<div class="modal-overlay" id="tokenPrintModal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <h3>🖨️ Token Slip Preview</h3>
+      <button class="modal-close" onclick="closeModal('tokenPrintModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-light);margin-bottom:12px;">
+        கீழே உள்ள token slip-ஐ patient-க்கு print பண்ணி கொடுங்கள்.
+      </p>
+      <div class="token-slip-preview">
+        <div class="token-slip-card" id="tokenSlipContent">
+          <!-- Filled dynamically -->
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('tokenPrintModal')">Close</button>
+      <button class="btn btn-print" onclick="printTokenSlip()">🖨️ Print Slip</button>
     </div>
   </div>
 </div>
@@ -298,6 +363,7 @@ const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null;
 let currentPatient = null;
 let waLogs = [];
+let lastPrintedToken = null; // store last registered patient for re-print
 
 // ── TIME ──
 function updateTime() {
@@ -309,7 +375,7 @@ setInterval(updateTime,1000); updateTime();
 // ── WHATSAPP SEND ──
 async function sendWhatsApp(to, message) {
   try {
-    const res = await fetch('/api/whatsapp', {
+    const res = await fetch('/.netlify/functions/whatsapp', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ to, message })
@@ -326,6 +392,115 @@ async function sendWhatsApp(to, message) {
     waLogs.unshift({ to, message, time: new Date().toLocaleTimeString(), status:'failed', error: e.message });
     return false;
   }
+}
+
+// ── TOKEN SLIP ──
+function buildTokenSlipHTML(patient, token) {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'});
+  const timeStr = now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
+  return `
+    <div class="slip-header">
+      <div class="slip-emblem">🏥</div>
+      <div>
+        <div class="slip-title">Virudhunagar PHC<br>Management System</div>
+        <div class="slip-subtitle">விருதுநகர் மாவட்ட முதன்மை சுகாதார மையம்</div>
+      </div>
+    </div>
+    <div class="slip-token-big">
+      <div style="font-size:11px;color:var(--text-light);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;">TOKEN NUMBER</div>
+      <div class="slip-token-num">T-${String(token).padStart(3,'0')}</div>
+      <div class="slip-token-label">உங்கள் token number</div>
+    </div>
+    <div class="slip-details">
+      <div class="slip-detail-item">
+        <div class="slip-detail-label">Patient Name</div>
+        <div class="slip-detail-value">${patient.name}</div>
+      </div>
+      <div class="slip-detail-item">
+        <div class="slip-detail-label">Age / Gender</div>
+        <div class="slip-detail-value">${patient.age} yrs / ${patient.gender||'-'}</div>
+      </div>
+      <div class="slip-detail-item">
+        <div class="slip-detail-label">Doctor</div>
+        <div class="slip-detail-value" style="font-size:11px;">${patient.doctor||'Duty Doctor'}</div>
+      </div>
+      <div class="slip-detail-item">
+        <div class="slip-detail-label">Date & Time</div>
+        <div class="slip-detail-value" style="font-size:11px;">${dateStr}, ${timeStr}</div>
+      </div>
+      <div class="slip-detail-item" style="grid-column:1/-1;">
+        <div class="slip-detail-label">Symptoms / Complaint</div>
+        <div class="slip-detail-value">${patient.disease||'General Checkup'}</div>
+      </div>
+    </div>
+    <div class="slip-footer">
+      <div style="font-size:12px;color:var(--primary);font-weight:600;margin-bottom:4px;">${patient.phc||currentUser?.phc||'Virudhunagar PHC'}</div>
+      <div>உங்கள் token call ஆகும்வரை காத்திருங்கள்</div>
+      <div style="margin-top:4px;font-size:10px;">Please wait until your token number is called</div>
+    </div>`;
+}
+
+function showTokenPrint(patient, token) {
+  lastPrintedToken = { patient, token };
+  document.getElementById('tokenSlipContent').innerHTML = buildTokenSlipHTML(patient, token);
+  document.getElementById('tokenPrintModal').classList.add('open');
+}
+
+function printTokenSlip() {
+  if (!lastPrintedToken) return;
+  const { patient, token } = lastPrintedToken;
+  // Build a printable version in the hidden div
+  const printDiv = document.getElementById('printTokenSlip');
+  printDiv.style.display = 'block';
+  printDiv.innerHTML = `<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+    body{font-family:'Poppins',sans-serif;}
+    .slip-header{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px dashed #ccc;margin-bottom:10px;}
+    .slip-emblem{width:36px;height:36px;background:#1a6b3c;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:white;}
+    .slip-title{font-size:11px;font-weight:700;color:#1a6b3c;line-height:1.3;}
+    .slip-subtitle{font-size:9px;color:#666;}
+    .slip-token-big{text-align:center;padding:10px 0;}
+    .slip-token-num{font-size:44px;font-weight:700;color:#1a6b3c;line-height:1;}
+    .slip-token-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px;}
+    .slip-details{margin:10px 0;}
+    .slip-detail-item{margin-bottom:6px;padding:5px 8px;background:#f5f5f5;border-radius:4px;}
+    .slip-detail-label{font-size:9px;color:#888;text-transform:uppercase;}
+    .slip-detail-value{font-size:12px;font-weight:600;color:#1a2e22;}
+    .slip-footer{text-align:center;font-size:10px;color:#888;padding-top:10px;border-top:1px dashed #ccc;}
+    .slip-phc{font-size:11px;color:#1a6b3c;font-weight:700;margin-bottom:3px;}
+  </style>
+  <div style="border-top:4px solid #1a6b3c;padding:12px;font-family:'Poppins',sans-serif;">
+    <div class="slip-header">
+      <div class="slip-emblem">🏥</div>
+      <div>
+        <div class="slip-title">Virudhunagar PHC Management System</div>
+        <div class="slip-subtitle">விருதுநகர் மாவட்ட முதன்மை சுகாதார மையம்</div>
+      </div>
+    </div>
+    <div class="slip-token-big">
+      <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;margin-bottom:3px;">TOKEN NUMBER</div>
+      <div class="slip-token-num">T-${String(token).padStart(3,'0')}</div>
+      <div class="slip-token-label">உங்கள் token number</div>
+    </div>
+    <div class="slip-details">
+      <div class="slip-detail-item"><div class="slip-detail-label">Patient Name</div><div class="slip-detail-value">${patient.name}</div></div>
+      <div class="slip-detail-item"><div class="slip-detail-label">Age / Gender</div><div class="slip-detail-value">${patient.age} yrs / ${patient.gender||'-'}</div></div>
+      <div class="slip-detail-item"><div class="slip-detail-label">Doctor</div><div class="slip-detail-value">${patient.doctor||'Duty Doctor'}</div></div>
+      <div class="slip-detail-item"><div class="slip-detail-label">Date & Time</div><div class="slip-detail-value">${new Date().toLocaleString('en-IN')}</div></div>
+      <div class="slip-detail-item"><div class="slip-detail-label">Complaint</div><div class="slip-detail-value">${patient.disease||'General Checkup'}</div></div>
+    </div>
+    <div class="slip-footer">
+      <div class="slip-phc">${patient.phc||'Virudhunagar PHC'}</div>
+      <div>உங்கள் token call ஆகும்வரை காத்திருங்கள்</div>
+      <div style="margin-top:2px;">Please wait until your token number is called</div>
+    </div>
+  </div>`;
+
+  window.print();
+
+  // Hide after print
+  setTimeout(() => { printDiv.style.display = 'none'; }, 1000);
 }
 
 // ── LOGIN ──
@@ -424,8 +599,13 @@ async function loadDashboard() {
   const {data:recents}=await db.from('patients').select('*').eq('phc',currentUser.phc).order('created_at',{ascending:false}).limit(5);
   const rp=document.getElementById('recentPatients');
   if(!recents||recents.length===0){rp.innerHTML='<p style="color:var(--text-light);font-size:13px;">No patients today yet.</p>';return;}
-  rp.innerHTML=`<table><tr><th>Token</th><th>Name</th><th>Age</th><th>Disease</th><th>Status</th></tr>
-  ${recents.map(p=>`<tr><td><strong>T-${String(p.token_number).padStart(3,'0')}</strong></td><td>${p.name}</td><td>${p.age}</td><td>${p.disease||'-'}</td><td><span class="badge badge-${p.status}">${p.status}</span></td></tr>`).join('')}</table>`;
+  rp.innerHTML=`<table><tr><th>Token</th><th>Name</th><th>Age</th><th>Disease</th><th>Status</th><th>Print</th></tr>
+  ${recents.map(p=>`<tr>
+    <td><strong>T-${String(p.token_number).padStart(3,'0')}</strong></td>
+    <td>${p.name}</td><td>${p.age}</td><td>${p.disease||'-'}</td>
+    <td><span class="badge badge-${p.status}">${p.status}</span></td>
+    <td><button class="btn btn-print btn-sm" onclick='showTokenPrint(${JSON.stringify(p).replace(/'/g,"&#39;")},${p.token_number})'>🖨️</button></td>
+  </tr>`).join('')}</table>`;
 }
 
 // ── REGISTER PATIENT ──
@@ -465,18 +645,26 @@ async function registerPatient(token) {
   const doctor=document.getElementById('reg_doctor').value.trim();
   if(!name||!age){showAlert('regAlert','error','Name and Age required!');return;}
 
-  const {error}=await db.from('patients').insert({name,age:parseInt(age),gender,mobile,address,disease,doctor,token_number:token,status:'waiting',phc:currentUser.phc});
+  const patientData = {name,age:parseInt(age),gender,mobile,address,disease,doctor,token_number:token,status:'waiting',phc:currentUser.phc};
+  const {error}=await db.from('patients').insert(patientData);
   if(error){showAlert('regAlert','error','Error: '+error.message);return;}
 
-  // Send WhatsApp if mobile provided
+  // Send SMS if mobile provided
   if(mobile) {
     const msg = `🏥 *Virudhunagar PHC*\n\nவணக்கம் ${name}!\n\nஉங்கள் Token Number: *T-${String(token).padStart(3,'0')}*\nநோய்: ${disease||'General Checkup'}\nமருத்துவர்: ${doctor}\n\nதயவுசெய்து உங்கள் token call ஆகும்வரை காத்திருங்கள்.\n\n📍 ${currentUser.phc}`;
     await sendWhatsApp(mobile, msg);
-    showAlert('regAlert','success',`✅ Token T-${String(token).padStart(3,'0')} registered! WhatsApp sent to ${mobile}`);
-  } else {
-    showAlert('regAlert','success',`✅ Token T-${String(token).padStart(3,'0')} registered!`);
   }
-  setTimeout(()=>loadRegister(),2500);
+
+  // Show success alert
+  showAlert('regAlert','success',`✅ Token T-${String(token).padStart(3,'0')} registered successfully!`);
+
+  // Auto-show print modal after short delay
+  setTimeout(() => {
+    showTokenPrint(patientData, token);
+  }, 800);
+
+  // Reload register after modal closed + 3s
+  setTimeout(()=>loadRegister(), 4000);
 }
 
 // ── QUEUE ──
@@ -494,8 +682,13 @@ async function loadQueue() {
   <div class="section-card">
     <div class="section-header"><h3>🎫 Token Queue</h3><button class="btn btn-outline btn-sm" onclick="loadQueue()">🔄 Refresh</button></div>
     <div class="section-body">
-      <table><tr><th>Token</th><th>Name</th><th>Age</th><th>Disease</th><th>Mobile</th><th>Status</th></tr>
-      ${(data||[]).map(p=>`<tr><td><strong>T-${String(p.token_number).padStart(3,'0')}</strong></td><td>${p.name}</td><td>${p.age}</td><td>${p.disease||'-'}</td><td>${p.mobile||'-'}</td><td><span class="badge badge-${p.status}">${p.status}</span></td></tr>`).join()||'<tr><td colspan="6" style="text-align:center;color:var(--text-light)">No patients today</td></tr>'}
+      <table><tr><th>Token</th><th>Name</th><th>Age</th><th>Disease</th><th>Mobile</th><th>Status</th><th>Print</th></tr>
+      ${(data||[]).map(p=>`<tr>
+        <td><strong>T-${String(p.token_number).padStart(3,'0')}</strong></td>
+        <td>${p.name}</td><td>${p.age}</td><td>${p.disease||'-'}</td><td>${p.mobile||'-'}</td>
+        <td><span class="badge badge-${p.status}">${p.status}</span></td>
+        <td><button class="btn btn-print btn-sm" onclick='showTokenPrint(${JSON.stringify(p).replace(/'/g,"&#39;")},${p.token_number})'>🖨️</button></td>
+      </tr>`).join()||'<tr><td colspan="7" style="text-align:center;color:var(--text-light)">No patients today</td></tr>'}
       </table>
     </div>
   </div>`;
@@ -677,7 +870,6 @@ async function registerPregnancy() {
   const {error}=await db.from('pregnancy').insert({unique_id:uid,name,age:parseInt(age),mobile,address,blood_group:blood,lmp_date:lmp,edd,weeks,high_risk:risk,hospital:currentUser.phc,status:'active',phc:currentUser.phc});
   if(error){showAlert('pregAlert','error','Error: '+error.message);return;}
 
-  // Send WhatsApp welcome
   if(mobile) {
     const msg=`🏥 *Virudhunagar PHC - Pregnancy Registration*\n\nவணக்கம் ${name}!\n\nஉங்கள் pregnancy registration முடிந்தது.\n\n🆔 *Unique ID: ${uid}*\n📅 *EDD (குழந்தை பிறப்பு தேதி): ${edd}*\n🩺 *Blood Group: ${blood}*\n⚠️ *High Risk: ${risk}*\n\nஒவ்வொரு மாதமும் checkup-க்கு வர மறக்காதீர்கள். நாங்கள் reminder அனுப்புவோம்.\n\n💚 ${currentUser.phc}`;
     await sendWhatsApp(mobile,msg);
@@ -814,8 +1006,13 @@ async function loadAllPatients() {
   c.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
   const {data}=await db.from('patients').select('*').order('created_at',{ascending:false}).limit(50);
   c.innerHTML=`<div class="section-card"><div class="section-header"><h3>👥 All Patients — District Wide</h3></div><div class="section-body">
-    <table><tr><th>Token</th><th>Name</th><th>Age</th><th>Disease</th><th>PHC</th><th>Status</th></tr>
-    ${(data||[]).map(p=>`<tr><td>T-${String(p.token_number).padStart(3,'0')}</td><td>${p.name}</td><td>${p.age}</td><td>${p.disease||'-'}</td><td style="font-size:12px;">${p.phc}</td><td><span class="badge badge-${p.status}">${p.status}</span></td></tr>`).join()||'<tr><td colspan="6" style="text-align:center;color:var(--text-light)">No data</td></tr>'}
+    <table><tr><th>Token</th><th>Name</th><th>Age</th><th>Disease</th><th>PHC</th><th>Status</th><th>Print</th></tr>
+    ${(data||[]).map(p=>`<tr>
+      <td>T-${String(p.token_number).padStart(3,'0')}</td><td>${p.name}</td><td>${p.age}</td>
+      <td>${p.disease||'-'}</td><td style="font-size:12px;">${p.phc}</td>
+      <td><span class="badge badge-${p.status}">${p.status}</span></td>
+      <td><button class="btn btn-print btn-sm" onclick='showTokenPrint(${JSON.stringify(p).replace(/'/g,"&#39;")},${p.token_number})'>🖨️</button></td>
+    </tr>`).join()||'<tr><td colspan="7" style="text-align:center;color:var(--text-light)">No data</td></tr>'}
     </table></div></div>`;
 }
 
