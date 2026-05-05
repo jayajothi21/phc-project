@@ -1,5 +1,3 @@
-const twilio = require('twilio');
-
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -17,32 +15,34 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Phone and message required' }) };
     }
 
-    const client = twilio(
-      process.env.TWILIO_ACCOUNT_SID,
-      process.env.TWILIO_AUTH_TOKEN
-    );
-
     let phone = to.replace(/\D/g, '');
-    if (phone.length === 10) phone = '91' + phone;
-    if (!phone.startsWith('+')) phone = '+' + phone;
+    if (phone.startsWith('91')) phone = phone.slice(2);
+    phone = phone.slice(-10);
 
-    const msg = await client.messages.create({
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: phone,
-      body: message
+    const response = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+      method: 'POST',
+      headers: {
+        'authorization': process.env.FAST2SMS_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        route: 'q',
+        message: message,
+        language: 'english',
+        flash: 0,
+        numbers: phone
+      })
     });
 
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ success: true, sid: msg.sid })
-    };
+    const data = await response.json();
+
+    if (data.return === true) {
+      return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
+    } else {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: data.message || 'SMS failed' }) };
+    }
 
   } catch (err) {
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: err.message })
-    };
+    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
   }
 };
