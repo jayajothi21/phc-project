@@ -363,7 +363,43 @@ const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null;
 let currentPatient = null;
 let waLogs = [];
-let lastPrintedToken = null; // store last registered patient for re-print
+let lastPrintedToken = null;
+let currentLocation = null; // GPS location captured at login
+
+// ── PHC COORDINATES (centre point + allowed radius in metres) ──
+// Update these coordinates for each real PHC location
+const PHC_LOCATIONS = {
+  'Virudhunagar Main PHC':  { lat: 9.5800, lng: 77.9624, radius: 300 },
+  'Aruppukottai PHC':       { lat: 9.5100, lng: 78.0960, radius: 300 },
+  'Sivakasi PHC':           { lat: 9.4510, lng: 77.7990, radius: 300 },
+  'Rajapalayam PHC':        { lat: 9.4520, lng: 77.5570, radius: 300 },
+  'Srivilliputhur PHC':     { lat: 9.5100, lng: 77.6370, radius: 300 },
+  'Sattur PHC':             { lat: 9.3490, lng: 77.9150, radius: 300 },
+  'Thiruchuli PHC':         { lat: 9.3700, lng: 77.9800, radius: 300 },
+  'Kariapatti PHC':         { lat: 9.4500, lng: 77.9200, radius: 300 },
+};
+
+// Haversine formula — returns distance in metres between two GPS coords
+function getDistanceMetres(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// Get GPS — returns Promise<{lat,lng}> or null
+function getGPS() {
+  return new Promise(resolve => {
+    if (!navigator.geolocation) { resolve(null); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) }),
+      ()  => resolve(null),
+      { timeout: 8000, maximumAge: 0, enableHighAccuracy: true }
+    );
+  });
+}
 
 // ── TIME ──
 function updateTime() {
@@ -512,10 +548,54 @@ async function login() {
   const { data, error } = await db.from('users').select('*').eq('email',email).eq('password',pass).single();
   if (error || !data) { showLoginError('Invalid email or password'); return; }
 
+  // ── GPS LOCATION CHECK ──
+  const loginBtn = document.querySelector('#loginPage .btn-primary');
+  if (loginBtn) { loginBtn.textContent = '📍 Getting location...'; loginBtn.disabled = true; }
+
+  const gps = await getGPS();
+  if (loginBtn) { loginBtn.textContent = '🔐 Login to System'; loginBtn.disabled = false; }
+
+  let locationStatus = 'location_off';   // default if GPS unavailable
+  let distanceFromPHC = null;
+  let withinPHC = false;
+  let gpsNote = '';
+
+  if (gps) {
+    currentLocation = gps;
+    const phcCoords = PHC_LOCATIONS[data.phc];
+    if (phcCoords) {
+      distanceFromPHC = Math.round(getDistanceMetres(gps.lat, gps.lng, phcCoords.lat, phcCoords.lng));
+      withinPHC = distanceFromPHC <= phcCoords.radius;
+      locationStatus = withinPHC ? 'within_phc' : 'outside_phc';
+      gpsNote = `${distanceFromPHC}m from PHC`;
+    } else {
+      locationStatus = 'phc_unknown';
+      gpsNote = `GPS: ${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}`;
+    }
+  }
+
+  // DDHS login — no location restriction
+  // Doctor/Staff/ANM — warn if outside PHC but still allow login (can be overridden)
+  if (data.role !== 'ddhs' && gps && distanceFromPHC !== null && !withinPHC) {
+    const proceed = confirm(
+      `⚠️ Location Alert!\n\nYou are ${distanceFromPHC}m away from ${data.phc}.\nAllowed radius: ${PHC_LOCATIONS[data.phc]?.radius||300}m\n\nAttendance will be marked as "Outside PHC".\n\nProceed with login?`
+    );
+    if (!proceed) return;
+  }
+
   currentUser = data;
+
+  // Save attendance with GPS data
   await db.from('attendance').insert({
-    user_name:data.name, role:data.role, phc:data.phc,
-    check_in:new Date().toTimeString().slice(0,5), status:'present'
+    user_name: data.name,
+    role: data.role,
+    phc: data.phc,
+    check_in: new Date().toTimeString().slice(0,5),
+    status: locationStatus === 'within_phc' || locationStatus === 'location_off' || data.role === 'ddhs' ? 'present' : 'outside_phc',
+    latitude: gps ? gps.lat : null,
+    longitude: gps ? gps.lng : null,
+    distance_from_phc: distanceFromPHC,
+    location_note: gpsNote || (gps ? null : 'GPS unavailable')
   });
 
   document.getElementById('loginPage').style.display='none';
@@ -966,19 +1046,70 @@ async function loadAttendance() {
   const today=new Date().toISOString().slice(0,10);
   const {data}=await db.from('attendance').select('*').eq('phc',currentUser.phc).order('created_at',{ascending:false}).limit(30);
   const todayRec=(data||[]).find(a=>a.date===today&&a.user_name===currentUser.name);
+
+  // Location status badge helper
+  function locBadge(rec) {
+    if (!rec) return '';
+    if (rec.status==='within_phc'||rec.status==='present') {
+      const dist = rec.distance_from_phc!=null ? ` · ${rec.distance_from_phc}m` : '';
+      return `<span class="badge badge-active">📍 Within PHC${dist}</span>`;
+    }
+    if (rec.status==='outside_phc') {
+      return `<span class="badge badge-critical">⚠️ Outside PHC · ${rec.distance_from_phc||'?'}m</span>`;
+    }
+    return `<span class="badge badge-waiting">📵 No GPS</span>`;
+  }
+
+  // Map link helper
+  function mapLink(rec) {
+    if (!rec || !rec.latitude) return '-';
+    const url=`https://www.google.com/maps?q=${rec.latitude},${rec.longitude}`;
+    return `<a href="${url}" target="_blank" style="color:var(--primary);font-size:11px;">🗺 View</a>`;
+  }
+
   c.innerHTML=`
   <div class="section-card" style="margin-bottom:20px;">
-    <div class="section-header"><h3>📅 My Attendance</h3></div>
+    <div class="section-header"><h3>📅 My Attendance Today</h3></div>
     <div class="section-body">
-      ${todayRec?`<div style="display:flex;align-items:center;gap:12px;background:#d4edda;border-radius:10px;padding:14px;"><span style="font-size:30px;">✅</span><div><strong>${currentUser.name}</strong><div style="font-size:13px;color:#155724;">Checked in at ${todayRec.check_in} — Present</div></div></div>`:
-      `<div style="display:flex;align-items:center;gap:12px;background:#fff3cd;border-radius:10px;padding:14px;"><span style="font-size:30px;">⚠️</span><div><strong>${currentUser.name}</strong><div style="font-size:13px;color:#856404;">Not checked in yet today</div></div></div>`}
+      ${todayRec ? `
+        <div style="display:flex;align-items:center;gap:12px;background:#d4edda;border-radius:10px;padding:14px;margin-bottom:12px;">
+          <span style="font-size:30px;">✅</span>
+          <div>
+            <strong>${currentUser.name}</strong>
+            <div style="font-size:13px;color:#155724;">Checked in at ${todayRec.check_in}</div>
+            <div style="margin-top:6px;">${locBadge(todayRec)}</div>
+            ${todayRec.latitude ? `<div style="font-size:11px;color:var(--text-light);margin-top:4px;">GPS: ${Number(todayRec.latitude).toFixed(5)}, ${Number(todayRec.longitude).toFixed(5)} · Accuracy ~${todayRec.location_note||''}</div>` : '<div style="font-size:11px;color:var(--text-light);margin-top:4px;">GPS not captured</div>'}
+          </div>
+        </div>` :
+        `<div style="display:flex;align-items:center;gap:12px;background:#fff3cd;border-radius:10px;padding:14px;">
+          <span style="font-size:30px;">⚠️</span>
+          <div><strong>${currentUser.name}</strong><div style="font-size:13px;color:#856404;">Not checked in yet today</div></div>
+        </div>`}
+      ${currentLocation ? `
+        <div style="background:var(--bg);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text-light);">
+          📍 Current GPS: <strong>${currentLocation.lat.toFixed(5)}, ${currentLocation.lng.toFixed(5)}</strong>
+          · Accuracy: ~${currentLocation.accuracy}m
+          <a href="https://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng}" target="_blank" style="color:var(--primary);margin-left:8px;">Open in Maps</a>
+        </div>` : ''}
     </div>
   </div>
+
   <div class="section-card">
-    <div class="section-header"><h3>📋 PHC Attendance Log</h3></div>
-    <div class="section-body">
-      <table><tr><th>Staff Name</th><th>Role</th><th>Date</th><th>Check-In</th><th>Status</th></tr>
-      ${(data||[]).map(a=>`<tr><td>${a.user_name}</td><td style="text-transform:capitalize;">${a.role}</td><td>${a.date}</td><td>${a.check_in||'-'}</td><td><span class="badge badge-${a.status==='present'?'active':'critical'}">${a.status}</span></td></tr>`).join()||'<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No records</td></tr>'}
+    <div class="section-header">
+      <h3>📋 PHC Attendance Log</h3>
+      <div style="font-size:12px;color:var(--text-light);">📍 = GPS verified location</div>
+    </div>
+    <div class="section-body" style="overflow-x:auto;">
+      <table>
+        <tr><th>Staff Name</th><th>Role</th><th>Date</th><th>Check-In</th><th>Location Status</th><th>Map</th></tr>
+        ${(data||[]).map(a=>`<tr>
+          <td><strong>${a.user_name}</strong></td>
+          <td style="text-transform:capitalize;">${a.role}</td>
+          <td>${a.date}</td>
+          <td>${a.check_in||'-'}</td>
+          <td>${locBadge(a)}</td>
+          <td>${mapLink(a)}</td>
+        </tr>`).join()||'<tr><td colspan="6" style="text-align:center;color:var(--text-light)">No records</td></tr>'}
       </table>
     </div>
   </div>`;
