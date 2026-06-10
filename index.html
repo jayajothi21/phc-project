@@ -185,6 +185,47 @@
 </style>
 </head>
 <body>
+<!--
+=== SUPABASE SQL — Run this in SQL Editor to enable all new features ===
+
+-- 1. Prescriptions table
+CREATE TABLE IF NOT EXISTS prescriptions (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  patient_name text,
+  patient_token text,
+  patient_mobile text,
+  diagnosis text,
+  medicines text,
+  medicines_count int DEFAULT 0,
+  notes text,
+  follow_up_date date,
+  doctor_name text,
+  phc text,
+  dispensed boolean DEFAULT false,
+  dispensed_at timestamp,
+  dispensed_by text,
+  created_at timestamp DEFAULT now()
+);
+
+-- 2. Add GPS columns to attendance (if not already done)
+ALTER TABLE attendance
+  ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS distance_from_phc INTEGER,
+  ADD COLUMN IF NOT EXISTS location_note TEXT;
+
+-- 3. Add disease_extras to patients
+ALTER TABLE patients
+  ADD COLUMN IF NOT EXISTS disease_extras text;
+
+-- 4. Add pharmacist user
+INSERT INTO users (name, role, phc, email, password) VALUES
+('Pharmacy Staff', 'pharmacist', 'Virudhunagar Main PHC', 'pharma@phc.com', 'pharma123')
+ON CONFLICT (email) DO NOTHING;
+
+-- 5. Run without RLS (for testing)
+-->
+
 
 <!-- LOGIN -->
 <div id="loginPage">
@@ -207,9 +248,11 @@
       👤 Staff: staff@phc.com / staff123<br>
       🩺 Doctor: doctor@phc.com / doctor123<br>
       🤰 ANM: anm@phc.com / anm123<br>
-      🏛 DDHS: ddhs@phc.com / ddhs123
+      💊 Pharmacist: pharma@phc.com / pharma123<br>
+      🏛 DDHS: ddhs@phc.com / ddhs123<br>
+      🧑 Patient: <em>Mobile No. as email + unique ID as password</em>
     </div>
-    <button class="btn btn-primary" onclick="login()">🔐 Login to System</button>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">🔐 Login to System</button>
     <div class="error-msg" id="loginError" style="background:#ffe8e8;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-top:12px;display:none;"></div>
   </div>
 </div>
@@ -354,6 +397,16 @@
 </div>
 
 <script>
+// ── SAFE INIT WRAPPER ──
+window.doLogin = function() {
+  if (typeof login === 'function') {
+    login();
+  } else {
+    document.getElementById('loginError').textContent = 'System loading... please wait 2 seconds and try again.';
+    document.getElementById('loginError').style.display = 'block';
+  }
+};
+
 // ── SUPABASE ──
 const SUPABASE_URL = 'https://jzsappmieigtjhxtppku.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6c2FwcG1pZWlndGpoeHRwcGt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NzY4NTYsImV4cCI6MjA5MzQ1Mjg1Nn0.GF8TQA1_SzION4LRF9cYq96DKkKl3yuxcZfu6-eKClE';
@@ -545,8 +598,31 @@ async function login() {
   const pass  = document.getElementById('loginPassword').value.trim();
   if (!email || !pass) { showLoginError('Email and password required'); return; }
 
-  const { data, error } = await db.from('users').select('*').eq('email',email).eq('password',pass).single();
-  if (error || !data) { showLoginError('Invalid email or password'); return; }
+  // First try staff/doctor users table
+  let { data, error } = await db.from('users').select('*').eq('email',email).eq('password',pass).single();
+  
+  // If not found, try patient login (mobile as email, unique_id as password)
+  if (error || !data) {
+    const mobile = email.replace('@','').replace('.com',''); // support plain mobile number too
+    const {data:patData, error:patErr} = await db.from('patients')
+      .select('*').eq('mobile', email).eq('disease', pass).limit(1);
+    // Patient login: mobile number as username, any visit exists
+    const {data:pregData} = await db.from('pregnancy')
+      .select('*').eq('mobile', email).eq('unique_id', pass).limit(1);
+    
+    if (pregData && pregData.length > 0) {
+      // Pregnant patient login
+      const p = pregData[0];
+      currentUser = { name: p.name, role: 'patient', phc: p.phc, mobile: email, id: p.id };
+      document.getElementById('loginPage').style.display='none';
+      document.getElementById('app').style.display='block';
+      setupSidebar();
+      navigateTo('myhistory');
+      return;
+    }
+    
+    showLoginError('Invalid email or password'); return;
+  }
 
   // ── GPS LOCATION CHECK ──
   const loginBtn = document.querySelector('#loginPage .btn-primary');
@@ -615,15 +691,17 @@ function logout(){
 
 // ── SIDEBAR ──
 const navConfig = {
-  staff:  [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'register',icon:'📋',label:'Register Patient'},{id:'queue',icon:'🎫',label:'Token Queue'},{id:'medicine',icon:'💊',label:'Medicine Stock'},{id:'whatsapp',icon:'📱',label:'WhatsApp Alerts'},{id:'attendance',icon:'📅',label:'Attendance'}],
-  doctor: [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'docqueue',icon:'🩺',label:'My Queue'},{id:'pregnancy',icon:'🤰',label:'Pregnancy Cases'},{id:'whatsapp',icon:'📱',label:'WhatsApp Alerts'},{id:'attendance',icon:'📅',label:'Attendance'}],
-  anm:    [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'pregnancy',icon:'🤰',label:'Pregnancy Module'},{id:'register',icon:'📋',label:'Register Patient'},{id:'whatsapp',icon:'📱',label:'WhatsApp Alerts'},{id:'attendance',icon:'📅',label:'Attendance'}],
-  ddhs:   [{id:'dashboard',icon:'📊',label:'District Dashboard'},{id:'allphcs',icon:'🏥',label:'All PHCs'},{id:'allpatients',icon:'👥',label:'All Patients'},{id:'pregnancy',icon:'🤰',label:'Pregnancy Overview'},{id:'medicine',icon:'💊',label:'Medicine Stock'},{id:'whatsapp',icon:'📱',label:'WhatsApp Center'},{id:'attendance',icon:'📅',label:'Staff Attendance'}]
+  staff:      [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'register',icon:'📋',label:'Register Patient'},{id:'queue',icon:'🎫',label:'Token Queue'},{id:'medicine',icon:'💊',label:'Medicine Stock'},{id:'whatsapp',icon:'📱',label:'WhatsApp Alerts'},{id:'attendance',icon:'📅',label:'Attendance'}],
+  doctor:     [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'docqueue',icon:'🩺',label:'My Queue'},{id:'prescription',icon:'📝',label:'Prescriptions'},{id:'pregnancy',icon:'🤰',label:'Pregnancy Cases'},{id:'pathistory',icon:'📂',label:'Patient History'},{id:'whatsapp',icon:'📱',label:'WhatsApp Alerts'},{id:'attendance',icon:'📅',label:'Attendance'}],
+  anm:        [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'pregnancy',icon:'🤰',label:'Pregnancy Module'},{id:'vaccination',icon:'💉',label:'Vaccination Schedule'},{id:'register',icon:'📋',label:'Register Patient'},{id:'whatsapp',icon:'📱',label:'WhatsApp Alerts'},{id:'attendance',icon:'📅',label:'Attendance'}],
+  pharmacist: [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'pharmacy',icon:'💊',label:'Dispense Medicine'},{id:'medicine',icon:'📦',label:'Stock Management'},{id:'attendance',icon:'📅',label:'Attendance'}],
+  ddhs:       [{id:'dashboard',icon:'📊',label:'District Dashboard'},{id:'allphcs',icon:'🏥',label:'All PHCs'},{id:'allpatients',icon:'👥',label:'All Patients'},{id:'pregnancy',icon:'🤰',label:'Pregnancy Overview'},{id:'vaccination',icon:'💉',label:'Vaccination'},{id:'medicine',icon:'💊',label:'Medicine Stock'},{id:'whatsapp',icon:'📱',label:'WhatsApp Center'},{id:'attendance',icon:'📅',label:'Staff Attendance'}],
+  patient:    [{id:'myhistory',icon:'📋',label:'My Medical History'},{id:'myprescriptions',icon:'📝',label:'My Prescriptions'},{id:'myvaccination',icon:'💉',label:'Vaccination Schedule'}]
 };
 
 function setupSidebar() {
   const role = currentUser.role;
-  document.getElementById('sidebarAvatar').textContent = role==='doctor'?'🩺':role==='anm'?'🤰':role==='ddhs'?'🏛':'👤';
+  document.getElementById('sidebarAvatar').textContent = role==='doctor'?'🩺':role==='anm'?'🤰':role==='ddhs'?'🏛':role==='pharmacist'?'💊':role==='patient'?'🧑':'👤';
   document.getElementById('sidebarName').textContent = currentUser.name;
   document.getElementById('sidebarRole').textContent = role.toUpperCase();
   document.getElementById('phcBadge').textContent = currentUser.phc?.split(' ')[0]||'PHC';
@@ -638,9 +716,9 @@ function navigateTo(page) {
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
   const navEl=document.getElementById('nav-'+page);
   if(navEl) navEl.classList.add('active');
-  const titles={dashboard:'Dashboard',register:'Register Patient',queue:'Token Queue',docqueue:'Doctor Queue',pregnancy:'Pregnancy Module',medicine:'Medicine Stock',whatsapp:'WhatsApp Center',attendance:'Attendance',allphcs:'All PHCs',allpatients:'All Patients'};
+  const titles={dashboard:'Dashboard',register:'Register Patient',queue:'Token Queue',docqueue:'Doctor Queue',prescription:'Prescriptions',pathistory:'Patient History',pregnancy:'Pregnancy Module',vaccination:'Vaccination Schedule',medicine:'Medicine Stock',pharmacy:'Dispense Medicine',whatsapp:'WhatsApp Center',attendance:'Attendance',allphcs:'All PHCs',allpatients:'All Patients',myhistory:'My Medical History',myprescriptions:'My Prescriptions',myvaccination:'My Vaccinations'};
   document.getElementById('pageTitle').textContent=titles[page]||page;
-  const pages={dashboard:loadDashboard,register:loadRegister,queue:loadQueue,docqueue:loadDocQueue,pregnancy:loadPregnancy,medicine:loadMedicine,whatsapp:loadWhatsApp,attendance:loadAttendance,allphcs:loadAllPHCs,allpatients:loadAllPatients};
+  const pages={dashboard:loadDashboard,register:loadRegister,queue:loadQueue,docqueue:loadDocQueue,prescription:loadPrescription,pathistory:loadPatHistory,pregnancy:loadPregnancy,vaccination:loadVaccination,medicine:loadMedicine,pharmacy:loadPharmacy,whatsapp:loadWhatsApp,attendance:loadAttendance,allphcs:loadAllPHCs,allpatients:loadAllPatients,myhistory:loadMyHistory,myprescriptions:loadMyPrescriptions,myvaccination:loadMyVaccination};
   if(pages[page]) pages[page]();
 }
 
@@ -707,7 +785,17 @@ async function loadRegister() {
         <div class="form-group"><label>Gender</label><select id="reg_gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
         <div class="form-group"><label>Mobile (WhatsApp)</label><input id="reg_mobile" placeholder="Phone number"></div>
         <div class="form-group full"><label>Address</label><input id="reg_address" placeholder="Address"></div>
-        <div class="form-group full"><label>Symptoms / Disease</label><textarea id="reg_disease" rows="3" placeholder="Describe symptoms..."></textarea></div>
+        <div class="form-group full">
+          <label>Disease / Symptoms *</label>
+          <select id="reg_disease_type" onchange="updateDiseaseForm(this.value)" style="margin-bottom:8px;">
+            <option value="">-- Select Disease / General --</option>
+            <option>Fever</option><option>Diabetes</option><option>Hypertension</option>
+            <option>Cough & Cold</option><option>Diarrhea</option><option>Anemia</option>
+            <option>Eye Problem</option><option>Skin Disease</option><option>General Checkup</option><option>Other</option>
+          </select>
+          <textarea id="reg_disease" rows="2" placeholder="Additional symptoms description..."></textarea>
+          <div id="diseaseExtraFields"></div>
+        </div>
         <div class="form-group"><label>Referred Doctor</label><input id="reg_doctor" placeholder="Doctor name" value="Dr. Ramesh Kumar"></div>
       </div>
       <button class="btn btn-primary" onclick="registerPatient(${nextToken})" style="margin-top:8px;">🎫 Register & Generate Token</button>
@@ -721,11 +809,14 @@ async function registerPatient(token) {
   const gender=document.getElementById('reg_gender').value;
   const mobile=document.getElementById('reg_mobile').value.trim();
   const address=document.getElementById('reg_address').value.trim();
-  const disease=document.getElementById('reg_disease').value.trim();
+  const diseaseType=document.getElementById('reg_disease_type')?.value||'';
+  const diseaseNotes=document.getElementById('reg_disease').value.trim();
+  const disease = diseaseType ? (diseaseNotes ? diseaseType+' — '+diseaseNotes : diseaseType) : diseaseNotes;
+  const extras = diseaseType ? JSON.stringify(collectDiseaseExtras(diseaseType)) : null;
   const doctor=document.getElementById('reg_doctor').value.trim();
   if(!name||!age){showAlert('regAlert','error','Name and Age required!');return;}
 
-  const patientData = {name,age:parseInt(age),gender,mobile,address,disease,doctor,token_number:token,status:'waiting',phc:currentUser.phc};
+  const patientData = {name,age:parseInt(age),gender,mobile,address,disease,disease_extras:extras,doctor,token_number:token,status:'waiting',phc:currentUser.phc};
   const {error}=await db.from('patients').insert(patientData);
   if(error){showAlert('regAlert','error','Error: '+error.message);return;}
 
@@ -1136,7 +1227,25 @@ async function loadAllPatients() {
   const c=document.getElementById('mainContent');
   c.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
   const {data}=await db.from('patients').select('*').order('created_at',{ascending:false}).limit(50);
-  c.innerHTML=`<div class="section-card"><div class="section-header"><h3>👥 All Patients — District Wide</h3></div><div class="section-body">
+  // Find patients not visited in 90+ days
+  const cutoff = new Date(Date.now() - 90*24*60*60*1000).toISOString();
+  const {data:lostPatients} = await db.from('patients')
+    .select('*').lt('created_at', cutoff).eq('status','done').not('mobile','is',null)
+    .order('created_at',{ascending:true}).limit(10);
+
+  c.innerHTML=`
+  ${(lostPatients||[]).length>0?`
+  <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:14px;margin-bottom:20px;">
+    <div style="font-weight:700;color:#856404;margin-bottom:8px;">⚠️ ${(lostPatients||[]).length} patients not visited in 3+ months</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      ${(lostPatients||[]).slice(0,5).map(p=>p.mobile?`
+        <button class="btn btn-warning btn-sm" onclick="send3MonthAlert('${p.mobile}','${p.name}')">
+          📱 Alert ${p.name}
+        </button>`:'').join('')}
+      <button class="btn btn-outline btn-sm" onclick="sendAll3MonthAlerts()">Send All Alerts</button>
+    </div>
+  </div>`:''}
+  <div class="section-card"><div class="section-header"><h3>👥 All Patients — District Wide</h3></div><div class="section-body">
     <table><tr><th>Token</th><th>Name</th><th>Age</th><th>Disease</th><th>PHC</th><th>Status</th><th>Print</th></tr>
     ${(data||[]).map(p=>`<tr>
       <td>T-${String(p.token_number).padStart(3,'0')}</td><td>${p.name}</td><td>${p.age}</td>
@@ -1145,6 +1254,608 @@ async function loadAllPatients() {
       <td><button class="btn btn-print btn-sm" onclick='showTokenPrint(${JSON.stringify(p).replace(/'/g,"&#39;")},${p.token_number})'>🖨️</button></td>
     </tr>`).join()||'<tr><td colspan="7" style="text-align:center;color:var(--text-light)">No data</td></tr>'}
     </table></div></div>`;
+}
+
+
+// ══════════════════════════════════════════════
+// ── DISEASE-BASED DYNAMIC FORMS (Register) ──
+// ══════════════════════════════════════════════
+const DISEASE_FORMS = {
+  'Fever': [
+    {id:'fever_days',label:'Fever since (days)',type:'number'},
+    {id:'fever_temp',label:'Temperature (°F)',type:'number'},
+    {id:'chills',label:'Chills / Shivering',type:'select',opts:['Yes','No']},
+    {id:'bodyache',label:'Body ache',type:'select',opts:['Yes','No']},
+  ],
+  'Diabetes': [
+    {id:'sugar_fasting',label:'Fasting Sugar (mg/dL)',type:'number'},
+    {id:'sugar_pp',label:'PP Sugar (mg/dL)',type:'number'},
+    {id:'insulin',label:'On Insulin?',type:'select',opts:['Yes','No']},
+    {id:'diabetes_since',label:'Diabetic since (years)',type:'number'},
+  ],
+  'Hypertension': [
+    {id:'bp_systolic',label:'BP Systolic (mmHg)',type:'number'},
+    {id:'bp_diastolic',label:'BP Diastolic (mmHg)',type:'number'},
+    {id:'bp_meds',label:'On BP Medication?',type:'select',opts:['Yes','No']},
+  ],
+  'Cough & Cold': [
+    {id:'cough_days',label:'Cough since (days)',type:'number'},
+    {id:'cough_type',label:'Cough type',type:'select',opts:['Dry','Wet','With blood']},
+    {id:'breathless',label:'Breathlessness?',type:'select',opts:['No','Mild','Severe']},
+    {id:'sore_throat',label:'Sore throat?',type:'select',opts:['Yes','No']},
+  ],
+  'Diarrhea': [
+    {id:'motions',label:'Motions per day',type:'number'},
+    {id:'blood_stool',label:'Blood in stool?',type:'select',opts:['Yes','No']},
+    {id:'vomiting',label:'Vomiting?',type:'select',opts:['Yes','No']},
+    {id:'dehydration',label:'Dehydration signs?',type:'select',opts:['None','Mild','Severe']},
+  ],
+  'Anemia': [
+    {id:'hb_level',label:'Hb Level (g/dL)',type:'number'},
+    {id:'pallor',label:'Pallor present?',type:'select',opts:['Yes','No']},
+    {id:'fatigue',label:'Fatigue level',type:'select',opts:['Mild','Moderate','Severe']},
+  ],
+};
+
+function getDiseaseExtraFields(disease) {
+  const fields = DISEASE_FORMS[disease];
+  if (!fields) return '';
+  return `<div style="background:#f0f8f4;border-radius:10px;padding:14px;margin-top:4px;">
+    <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:10px;">📋 ${disease} — Additional Details</div>
+    <div class="form-grid">
+    ${fields.map(f => `<div class="form-group">
+      <label>${f.label}</label>
+      ${f.type==='select'
+        ? `<select id="dx_${f.id}">${f.opts.map(o=>`<option>${o}</option>`).join('')}</select>`
+        : `<input id="dx_${f.id}" type="${f.type}" placeholder="${f.label}">`}
+    </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function collectDiseaseExtras(disease) {
+  const fields = DISEASE_FORMS[disease];
+  if (!fields) return {};
+  const result = {};
+  fields.forEach(f => {
+    const el = document.getElementById('dx_'+f.id);
+    if (el) result[f.id] = el.value;
+  });
+  return result;
+}
+
+// ══════════════════════════════════
+// ── DIGITAL PRESCRIPTION MODULE ──
+// ══════════════════════════════════
+async function loadPrescription() {
+  const c = document.getElementById('mainContent');
+  c.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
+  const {data} = await db.from('prescriptions').select('*').eq('phc', currentUser.phc).order('created_at',{ascending:false}).limit(20);
+  c.innerHTML = `
+  <div class="section-card" style="margin-bottom:20px;">
+    <div class="section-header">
+      <h3>📝 New Prescription</h3>
+      <button class="btn btn-outline btn-sm" onclick="loadPrescription()">🔄 Refresh</button>
+    </div>
+    <div class="section-body">
+      <div id="rxAlert" class="alert"></div>
+      <div class="form-grid">
+        <div class="form-group"><label>Patient Token / Name *</label><input id="rx_patient" placeholder="T-001 or patient name"></div>
+        <div class="form-group"><label>Patient Mobile</label><input id="rx_mobile" placeholder="Mobile number"></div>
+        <div class="form-group full"><label>Diagnosis</label><input id="rx_diagnosis" placeholder="Doctor's diagnosis"></div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">💊 Medicines</label>
+        <div id="rxMedsList">
+          <div class="rx-med-row" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center;">
+            <input placeholder="Medicine name" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+            <input placeholder="Dosage" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+            <select style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;"><option>Morning</option><option>Afternoon</option><option>Night</option><option>Morning+Night</option><option>TDS</option><option>OD</option><option>BD</option></select>
+            <input placeholder="Days" type="number" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+            <button onclick="this.closest('.rx-med-row').remove()" class="btn btn-danger btn-sm">×</button>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="addMedRow()" style="margin-top:4px;">+ Add Medicine</button>
+      </div>
+      <div class="form-group"><label>Instructions / Notes</label><textarea id="rx_notes" rows="2" placeholder="Take after food, avoid cold water..."></textarea></div>
+      <div class="form-group"><label>Follow-up Date</label><input id="rx_followup" type="date"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="savePrescription(true)">💊 Save & Send to Pharmacy</button>
+        <button class="btn btn-outline" onclick="savePrescription(false)">Save Only</button>
+        <button class="btn btn-outline" id="voiceBtn" onclick="toggleVoice()">🎤 Voice Input</button>
+      </div>
+      <div id="voiceStatus" style="font-size:12px;color:var(--primary);margin-top:8px;display:none;">🎤 Listening... (speak your prescription)</div>
+    </div>
+  </div>
+  <div class="section-card">
+    <div class="section-header"><h3>📋 Recent Prescriptions</h3></div>
+    <div class="section-body">
+      <table><tr><th>Date</th><th>Patient</th><th>Diagnosis</th><th>Medicines</th><th>Status</th></tr>
+      ${(data||[]).length===0?'<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No prescriptions yet</td></tr>':
+      (data||[]).map(rx=>`<tr>
+        <td style="font-size:12px;">${rx.created_at?.slice(0,10)||'-'}</td>
+        <td><strong>${rx.patient_name||rx.patient_token||'-'}</strong></td>
+        <td>${rx.diagnosis||'-'}</td>
+        <td style="font-size:12px;">${rx.medicines_count||0} items</td>
+        <td><span class="badge ${rx.dispensed?'badge-done':'badge-waiting'}">${rx.dispensed?'Dispensed':'Pending'}</span></td>
+      </tr>`).join('')}
+      </table>
+    </div>
+  </div>`;
+}
+
+function addMedRow() {
+  const row = document.createElement('div');
+  row.className = 'rx-med-row';
+  row.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center;';
+  row.innerHTML = `
+    <input placeholder="Medicine name" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+    <input placeholder="Dosage" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+    <select style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;"><option>Morning</option><option>Afternoon</option><option>Night</option><option>Morning+Night</option><option>TDS</option><option>OD</option><option>BD</option></select>
+    <input placeholder="Days" type="number" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+    <button onclick="this.closest('.rx-med-row').remove()" class="btn btn-danger btn-sm">×</button>`;
+  document.getElementById('rxMedsList').appendChild(row);
+}
+
+// ── VOICE TO TEXT ──
+let recognition = null;
+let voiceActive = false;
+function toggleVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Voice input not supported in this browser. Use Chrome.'); return;
+  }
+  if (voiceActive) {
+    recognition?.stop(); return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'en-IN';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  let finalText = document.getElementById('rx_notes').value;
+  recognition.onresult = e => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalText += e.results[i][0].transcript + ' ';
+      else interim = e.results[i][0].transcript;
+    }
+    document.getElementById('rx_notes').value = finalText + interim;
+  };
+  recognition.onstart = () => {
+    voiceActive = true;
+    document.getElementById('voiceBtn').textContent = '⏹ Stop Voice';
+    document.getElementById('voiceStatus').style.display = 'block';
+  };
+  recognition.onend = () => {
+    voiceActive = false;
+    document.getElementById('voiceBtn').textContent = '🎤 Voice Input';
+    document.getElementById('voiceStatus').style.display = 'none';
+  };
+  recognition.start();
+}
+
+function updateDiseaseForm(disease) {
+  document.getElementById('diseaseExtraFields').innerHTML = getDiseaseExtraFields(disease);
+}
+
+async function savePrescription(sendToPharmacy) {
+  const patient = document.getElementById('rx_patient').value.trim();
+  const mobile  = document.getElementById('rx_mobile').value.trim();
+  const diag    = document.getElementById('rx_diagnosis').value.trim();
+  const notes   = document.getElementById('rx_notes').value.trim();
+  const followup= document.getElementById('rx_followup').value;
+  if (!patient) { showAlert('rxAlert','error','Patient name/token required!'); return; }
+
+  // Collect medicines from rows
+  const rows = document.querySelectorAll('.rx-med-row');
+  const meds = [];
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input,select');
+    if (inputs[0].value.trim()) {
+      meds.push({ name:inputs[0].value, dosage:inputs[1].value, timing:inputs[2].value, days:inputs[3].value });
+    }
+  });
+
+  const rxData = {
+    patient_name: patient, patient_mobile: mobile, diagnosis: diag,
+    medicines: JSON.stringify(meds), medicines_count: meds.length,
+    notes, follow_up_date: followup||null,
+    doctor_name: currentUser.name, phc: currentUser.phc,
+    dispensed: false
+  };
+
+  const {data:rx, error} = await db.from('prescriptions').insert(rxData).select().single();
+  if (error) { showAlert('rxAlert','error','Error: '+error.message); return; }
+
+  // Send SMS to patient if mobile provided
+  if (mobile && meds.length > 0) {
+    const medList = meds.map(m=>`• ${m.name} ${m.dosage} — ${m.timing} × ${m.days} days`).join('\n');
+    const msg = `🏥 *Virudhunagar PHC - Prescription*\n\nவணக்கம் ${patient}!\n\n📋 Diagnosis: ${diag||'As examined'}\n\n💊 Medicines:\n${medList}\n\n📅 Follow-up: ${followup||'As needed'}\n📝 ${notes||''}\n\n${currentUser.phc}`;
+    await sendWhatsApp(mobile, msg);
+  }
+
+  const msg = sendToPharmacy
+    ? `✅ Prescription saved & sent to Pharmacy! (${meds.length} medicines)`
+    : `✅ Prescription saved! (${meds.length} medicines)`;
+  showAlert('rxAlert','success', msg);
+  setTimeout(()=>loadPrescription(), 2500);
+}
+
+// ══════════════════════════════
+// ── PHARMACIST DASHBOARD ──
+// ══════════════════════════════
+async function loadPharmacy() {
+  const c = document.getElementById('mainContent');
+  c.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
+  const {data:rxList} = await db.from('prescriptions').select('*').eq('phc', currentUser.phc).eq('dispensed', false).order('created_at',{ascending:true});
+  const {data:dispensed} = await db.from('prescriptions').select('*').eq('phc', currentUser.phc).eq('dispensed', true).order('created_at',{ascending:false}).limit(10);
+
+  c.innerHTML = `
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon orange">⏳</div><div class="stat-info"><div class="value">${(rxList||[]).length}</div><div class="label">Pending Dispense</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><div class="value">${(dispensed||[]).length}</div><div class="label">Dispensed Today</div></div></div>
+  </div>
+  <div class="section-card" style="margin-bottom:20px;">
+    <div class="section-header"><h3>⏳ Pending Prescriptions</h3><button class="btn btn-outline btn-sm" onclick="loadPharmacy()">🔄</button></div>
+    <div class="section-body">
+      ${(rxList||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">No pending prescriptions.</p>':
+      (rxList||[]).map(rx=>{
+        let meds = [];
+        try { meds = JSON.parse(rx.medicines||'[]'); } catch(e){}
+        return `<div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;background:white;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+            <div>
+              <div style="font-size:15px;font-weight:700;">${rx.patient_name}</div>
+              <div style="font-size:12px;color:var(--text-light);">Dr. ${rx.doctor_name} · ${rx.created_at?.slice(0,16)||''}</div>
+              <div style="font-size:13px;color:var(--primary);margin-top:4px;">Diagnosis: ${rx.diagnosis||'-'}</div>
+            </div>
+            <button class="btn btn-success btn-sm" onclick="dispensePrescription('${rx.id}','${rx.patient_name}','${rx.patient_mobile||''}',this)">✅ Dispense</button>
+          </div>
+          <div style="background:var(--bg);border-radius:8px;padding:10px;">
+            <div style="font-size:12px;font-weight:600;color:var(--text-light);margin-bottom:6px;">MEDICINES (${meds.length}):</div>
+            ${meds.map(m=>`<div style="font-size:13px;padding:3px 0;border-bottom:1px solid var(--border);">💊 <strong>${m.name}</strong> ${m.dosage} — ${m.timing} × ${m.days} days</div>`).join('')}
+          </div>
+          ${rx.notes?`<div style="font-size:12px;color:var(--text-light);margin-top:8px;">📝 ${rx.notes}</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+  <div class="section-card">
+    <div class="section-header"><h3>✅ Recently Dispensed</h3></div>
+    <div class="section-body">
+      <table><tr><th>Patient</th><th>Medicines</th><th>Doctor</th><th>Time</th></tr>
+      ${(dispensed||[]).map(rx=>`<tr>
+        <td><strong>${rx.patient_name}</strong></td>
+        <td>${rx.medicines_count||0} items</td>
+        <td>${rx.doctor_name}</td>
+        <td style="font-size:12px;">${rx.dispensed_at?.slice(11,16)||'-'}</td>
+      </tr>`).join()||'<tr><td colspan="4" style="text-align:center;color:var(--text-light)">None today</td></tr>'}
+      </table>
+    </div>
+  </div>`;
+}
+
+async function dispensePrescription(rxId, patientName, mobile, btn) {
+  btn.disabled = true; btn.textContent = 'Processing...';
+
+  // Get prescription medicines and deduct stock
+  const {data:rx} = await db.from('prescriptions').select('*').eq('id', rxId).single();
+  let meds = [];
+  try { meds = JSON.parse(rx?.medicines||'[]'); } catch(e){}
+
+  // Deduct from medicine stock (match by name)
+  for (const med of meds) {
+    const {data:stock} = await db.from('medicine').select('*').eq('phc', currentUser.phc).ilike('name', `%${med.name}%`).single();
+    if (stock && stock.stock > 0) {
+      const newStock = Math.max(0, stock.stock - (parseInt(med.days)||1));
+      await db.from('medicine').update({stock: newStock}).eq('id', stock.id);
+    }
+  }
+
+  // Mark prescription as dispensed
+  await db.from('prescriptions').update({dispensed: true, dispensed_at: new Date().toISOString(), dispensed_by: currentUser.name}).eq('id', rxId);
+
+  // SMS to patient
+  if (mobile) {
+    const msg = `🏥 *Virudhunagar PHC - Medicines Ready*\n\nவணக்கம் ${patientName}!\n\n✅ உங்கள் medicines ready ஆகிவிட்டது.\nPharmacy counter-ல் வந்து எடுத்துக்கொள்ளுங்கள்.\n\n${currentUser.phc}`;
+    await sendWhatsApp(mobile, msg);
+  }
+
+  btn.textContent = '✅ Done!';
+  setTimeout(()=>loadPharmacy(), 1500);
+}
+
+// ══════════════════════════════════
+// ── VACCINATION SCHEDULE MODULE ──
+// ══════════════════════════════════
+const VACCINE_SCHEDULE = [
+  {name:'BCG',age:'At birth',dose:'0.1ml ID',disease:'Tuberculosis'},
+  {name:'OPV 0',age:'At birth',dose:'2 drops oral',disease:'Polio'},
+  {name:'Hepatitis B (Birth)',age:'At birth',dose:'0.5ml IM',disease:'Hepatitis B'},
+  {name:'OPV 1 + IPV 1',age:'6 weeks',dose:'2 drops + 0.1ml',disease:'Polio'},
+  {name:'Pentavalent 1',age:'6 weeks',dose:'0.5ml IM',disease:'DPT+HepB+Hib'},
+  {name:'PCV 1',age:'6 weeks',dose:'0.5ml IM',disease:'Pneumonia'},
+  {name:'OPV 2 + Pentavalent 2',age:'10 weeks',dose:'Standard',disease:'Polio+DPT'},
+  {name:'OPV 3 + Pentavalent 3',age:'14 weeks',dose:'Standard',disease:'Polio+DPT'},
+  {name:'PCV 2',age:'14 weeks',dose:'0.5ml IM',disease:'Pneumonia'},
+  {name:'Measles / MR 1',age:'9 months',dose:'0.5ml SC',disease:'Measles+Rubella'},
+  {name:'JE 1',age:'9 months',dose:'0.5ml SC',disease:'Japanese Encephalitis'},
+  {name:'Vitamin A (1st dose)',age:'9 months',dose:'1 lakh IU',disease:'Deficiency'},
+  {name:'DPT Booster 1 + OPV Booster',age:'16-24 months',dose:'Standard',disease:'DPT+Polio'},
+  {name:'Measles / MR 2',age:'16-24 months',dose:'0.5ml SC',disease:'Measles+Rubella'},
+  {name:'TT (Pregnant Women)',age:'Pregnancy',dose:'0.5ml IM',disease:'Tetanus'},
+];
+
+async function loadVaccination() {
+  const c = document.getElementById('mainContent');
+  c.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
+
+  // Load pregnancy cases for sending vaccination reminders
+  const {data:pregList} = await db.from('pregnancy').select('*').eq('phc', currentUser.phc).eq('status','active');
+
+  c.innerHTML = `
+  <div class="section-card" style="margin-bottom:20px;">
+    <div class="section-header">
+      <h3>💉 National Immunisation Schedule</h3>
+      <button class="btn btn-whatsapp btn-sm" onclick="sendVaccineReminders()">📱 Send All Reminders</button>
+    </div>
+    <div class="section-body" style="overflow-x:auto;">
+      <table>
+        <tr><th>Vaccine</th><th>Age / Time</th><th>Dose</th><th>Disease Protected</th></tr>
+        ${VACCINE_SCHEDULE.map(v=>`<tr>
+          <td><strong>${v.name}</strong></td>
+          <td><span class="badge badge-active">${v.age}</span></td>
+          <td style="font-size:12px;">${v.dose}</td>
+          <td style="font-size:12px;color:var(--text-light);">${v.disease}</td>
+        </tr>`).join('')}
+      </table>
+    </div>
+  </div>
+  <div class="section-card">
+    <div class="section-header"><h3>🤰 Send Vaccination Reminders to Pregnant Women</h3></div>
+    <div class="section-body">
+      ${(pregList||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">No active pregnancy cases.</p>':
+      (pregList||[]).map(p=>{
+        const weeks = Math.floor((Date.now()-new Date(p.lmp_date))/(7*24*60*60*1000));
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+          <div>
+            <strong>${p.name}</strong>
+            <div style="font-size:12px;color:var(--text-light);">Week ${weeks} · ${p.mobile||'No mobile'} · ${p.unique_id}</div>
+          </div>
+          ${p.mobile?`<button class="btn btn-whatsapp btn-sm" onclick="sendVaccineAlert('${p.mobile}','${p.name}',${weeks})">💉 Send Alert</button>`:'<span style="font-size:12px;color:var(--text-light);">No mobile</span>'}
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+async function sendVaccineAlert(mobile, name, weeks) {
+  let vaccines = [];
+  if (weeks < 6) vaccines = ['TT 1st dose'];
+  else if (weeks < 14) vaccines = ['TT 2nd dose', 'IFA tablets'];
+  else vaccines = ['TT Booster', 'IFA + Calcium tablets'];
+
+  const msg = `🏥 *Virudhunagar PHC - Vaccination Reminder*\n\nவணக்கம் ${name}!\n\n💉 தாய் சேய் நல திட்டம் — Vaccination Reminder\n\nதேவையான vaccines:\n${vaccines.map(v=>'• '+v).join('\n')}\n\nPHC-ல் வந்து vaccine எடுத்துக்கொள்ளுங்கள்.\n\n${currentUser.phc}`;
+  const ok = await sendWhatsApp(mobile, msg);
+  alert(ok ? `✅ Vaccine reminder sent to ${name}!` : `❌ Failed to send to ${name}`);
+}
+
+async function sendVaccineReminders() {
+  const {data} = await db.from('pregnancy').select('*').eq('phc', currentUser.phc).eq('status','active');
+  if (!data || data.length===0) { alert('No active cases'); return; }
+  let sent = 0;
+  for (const p of data) {
+    if (p.mobile) {
+      const weeks = Math.floor((Date.now()-new Date(p.lmp_date))/(7*24*60*60*1000));
+      await sendVaccineAlert(p.mobile, p.name, weeks);
+      sent++;
+    }
+  }
+  alert(`✅ Vaccination reminders sent to ${sent} patients!`);
+}
+
+// ══════════════════════════════
+// ── PATIENT HISTORY MODULE ──
+// ══════════════════════════════
+async function loadPatHistory() {
+  const c = document.getElementById('mainContent');
+  c.innerHTML = `
+  <div class="section-card">
+    <div class="section-header"><h3>📂 Search Patient History</h3></div>
+    <div class="section-body">
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <input id="histSearch" placeholder="Enter patient name or mobile number..." style="flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none;">
+        <button class="btn btn-primary" style="width:auto;" onclick="searchPatientHistory()">🔍 Search</button>
+      </div>
+      <div id="histResults"><p style="color:var(--text-light);font-size:13px;">Enter name or mobile number to search.</p></div>
+    </div>
+  </div>`;
+}
+
+async function searchPatientHistory() {
+  const q = document.getElementById('histSearch').value.trim();
+  if (!q) return;
+  const r = document.getElementById('histResults');
+  r.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  const {data:patients} = await db.from('patients').select('*').eq('phc', currentUser.phc).or(`name.ilike.%${q}%,mobile.eq.${q}`).order('created_at',{ascending:false});
+  const {data:rxs} = await db.from('prescriptions').select('*').eq('phc', currentUser.phc).ilike('patient_name', `%${q}%`).order('created_at',{ascending:false});
+
+  if ((!patients||patients.length===0) && (!rxs||rxs.length===0)) {
+    r.innerHTML = '<p style="color:var(--text-light);font-size:13px;">No records found.</p>'; return;
+  }
+
+  r.innerHTML = `
+  ${(patients||[]).length>0?`
+  <div class="section-card" style="margin-bottom:16px;">
+    <div class="section-header"><h3>👤 Visit History (${(patients||[]).length} visits)</h3></div>
+    <div class="section-body">
+      <table><tr><th>Date</th><th>Token</th><th>Disease</th><th>Doctor</th><th>Status</th></tr>
+      ${(patients||[]).map(p=>`<tr>
+        <td style="font-size:12px;">${p.created_at?.slice(0,10)||'-'}</td>
+        <td><strong>T-${String(p.token_number).padStart(3,'0')}</strong></td>
+        <td>${p.disease||'-'}</td>
+        <td style="font-size:12px;">${p.doctor||'-'}</td>
+        <td><span class="badge badge-${p.status}">${p.status}</span></td>
+      </tr>`).join('')}
+      </table>
+    </div>
+  </div>`:''}
+  ${(rxs||[]).length>0?`
+  <div class="section-card">
+    <div class="section-header"><h3>📝 Prescription History (${(rxs||[]).length})</h3></div>
+    <div class="section-body">
+      ${(rxs||[]).map(rx=>{
+        let meds=[]; try{meds=JSON.parse(rx.medicines||'[]')}catch(e){}
+        return `<div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;">
+          <div style="font-size:13px;font-weight:600;">${rx.created_at?.slice(0,10)} — Dr. ${rx.doctor_name}</div>
+          <div style="font-size:13px;color:var(--primary);margin:4px 0;">Diagnosis: ${rx.diagnosis||'-'}</div>
+          ${meds.map(m=>`<div style="font-size:12px;padding:2px 0;">💊 ${m.name} ${m.dosage} — ${m.timing} × ${m.days} days</div>`).join('')}
+          ${rx.notes?`<div style="font-size:12px;color:var(--text-light);margin-top:4px;">📝 ${rx.notes}</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`:''}`;
+}
+
+// ═══════════════════════════════════════
+// ── PATIENT SELF-LOGIN (Mobile View) ──
+// ═══════════════════════════════════════
+async function loadMyHistory() {
+  const c = document.getElementById('mainContent');
+  const {data:visits} = await db.from('patients').select('*').eq('mobile', currentUser.mobile||'').order('created_at',{ascending:false});
+  c.innerHTML = `
+  <div class="section-card">
+    <div class="section-header"><h3>📋 My Visit History</h3></div>
+    <div class="section-body">
+      ${(visits||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">No visit records found.</p>':
+      (visits||[]).map(v=>`<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;">
+        <div style="font-size:14px;font-weight:700;">T-${String(v.token_number).padStart(3,'0')} — ${v.disease||'General'}</div>
+        <div style="font-size:12px;color:var(--text-light);margin-top:4px;">📅 ${v.created_at?.slice(0,10)} · 🏥 ${v.phc} · 🩺 ${v.doctor||'-'}</div>
+        <span class="badge badge-${v.status}" style="margin-top:6px;">${v.status}</span>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+async function loadMyPrescriptions() {
+  const c = document.getElementById('mainContent');
+  const {data:rxs} = await db.from('prescriptions').select('*').eq('patient_mobile', currentUser.mobile||'').order('created_at',{ascending:false});
+  c.innerHTML = `
+  <div class="section-card">
+    <div class="section-header"><h3>📝 My Prescriptions</h3></div>
+    <div class="section-body">
+      ${(rxs||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">No prescriptions found.</p>':
+      (rxs||[]).map(rx=>{
+        let meds=[]; try{meds=JSON.parse(rx.medicines||'[]')}catch(e){}
+        return `<div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;">
+          <div style="font-size:14px;font-weight:700;">📅 ${rx.created_at?.slice(0,10)} — Dr. ${rx.doctor_name}</div>
+          <div style="font-size:13px;color:var(--primary);margin:6px 0;">Diagnosis: ${rx.diagnosis||'-'}</div>
+          ${meds.map(m=>`<div style="font-size:13px;padding:3px 0;border-bottom:1px solid var(--border);">💊 <strong>${m.name}</strong> ${m.dosage} — ${m.timing} × ${m.days} days</div>`).join('')}
+          ${rx.notes?`<div style="font-size:12px;color:var(--text-light);margin-top:8px;">📝 ${rx.notes}</div>`:''}
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn btn-print btn-sm" onclick="printRx(${JSON.stringify(rx).replace(/"/g,'&quot;')})">🖨️ Print</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function printRx(rx) {
+  let meds=[]; try{meds=JSON.parse(rx.medicines||'[]')}catch(e){}
+  const win = window.open('','_blank');
+  win.document.write(`<html><body style="font-family:sans-serif;padding:20px;max-width:400px;">
+    <h2 style="color:#1a6b3c;">Virudhunagar PHC</h2>
+    <p style="color:#666;font-size:12px;">${rx.phc}</p>
+    <hr><p><strong>Patient:</strong> ${rx.patient_name}</p>
+    <p><strong>Date:</strong> ${rx.created_at?.slice(0,10)}</p>
+    <p><strong>Doctor:</strong> ${rx.doctor_name}</p>
+    <p><strong>Diagnosis:</strong> ${rx.diagnosis||'-'}</p>
+    <hr><h4>Medicines:</h4>
+    ${meds.map((m,i)=>`<p>${i+1}. <strong>${m.name}</strong> ${m.dosage} — ${m.timing} × ${m.days} days</p>`).join('')}
+    ${rx.notes?`<hr><p><strong>Instructions:</strong> ${rx.notes}</p>`:''}
+    <p><strong>Follow-up:</strong> ${rx.follow_up_date||'As needed'}</p>
+    <script>window.print();window.close();</script></body></html>`);
+}
+
+async function loadMyVaccination() {
+  const c = document.getElementById('mainContent');
+  c.innerHTML = `
+  <div class="section-card">
+    <div class="section-header"><h3>💉 Vaccination Schedule</h3></div>
+    <div class="section-body" style="overflow-x:auto;">
+      <table>
+        <tr><th>Vaccine</th><th>Age</th><th>Disease</th></tr>
+        ${VACCINE_SCHEDULE.map(v=>`<tr>
+          <td><strong>${v.name}</strong></td>
+          <td><span class="badge badge-active">${v.age}</span></td>
+          <td style="font-size:12px;color:var(--text-light);">${v.disease}</td>
+        </tr>`).join('')}
+      </table>
+    </div>
+  </div>`;
+}
+
+
+// ══════════════════════════════════════
+// ── 3-MONTH FOLLOW-UP ALERT SYSTEM ──
+// ══════════════════════════════════════
+async function send3MonthAlert(mobile, name) {
+  const msg = `🏥 *Virudhunagar PHC - Follow-up Alert*
+
+வணக்கம் ${name}!
+
+3 மாதங்களுக்கும் மேலாக PHC-க்கு வரவில்லை.
+
+நீங்கள் வேறு hospital-ல் treatment எடுக்கிறீர்களா?
+
+✅ YES — வேறு hospital-ல் treatment
+❌ NO — treatment நிறுத்திவிட்டேன்
+
+தயவுசெய்து PHC-ல் வந்து check-up பண்ணுங்கள்.
+
+${currentUser?.phc||'Virudhunagar PHC'}`;
+  const ok = await sendWhatsApp(mobile, msg);
+  alert(ok ? `✅ Follow-up alert sent to ${name}!` : `❌ Failed to send to ${name}`);
+}
+
+async function sendAll3MonthAlerts() {
+  const cutoff = new Date(Date.now() - 90*24*60*60*1000).toISOString();
+  const {data} = await db.from('patients').select('*').lt('created_at', cutoff).eq('status','done').not('mobile','is',null);
+  if (!data || data.length===0) { alert('No patients to alert'); return; }
+  let sent = 0;
+  for (const p of data) {
+    if (p.mobile) { await send3MonthAlert(p.mobile, p.name); sent++; }
+  }
+  alert(`✅ Follow-up alerts sent to ${sent} patients!`);
+}
+
+// Delivery confirmation for pregnancy (9-10 months)
+async function sendDeliveryCheck() {
+  const {data} = await db.from('pregnancy').select('*').eq('status','active');
+  if (!data) return;
+  for (const p of data) {
+    const weeks = Math.floor((Date.now()-new Date(p.lmp_date))/(7*24*60*60*1000));
+    if (weeks >= 38 && p.mobile) {
+      const msg = `🏥 *Virudhunagar PHC - Delivery Check*
+
+வணக்கம் ${p.name}!
+
+ID: ${p.unique_id}
+
+👶 குழந்தை பிறந்துவிட்டதா?
+
+கீழே பதில் அனுப்புங்கள்:
+✅ YES — பிறந்துவிட்டது
+❌ NO — இன்னும் நேரமாகவில்லை
+
+YES என்றால் குழந்தையின் gender சொல்லுங்கள்.
+
+${p.phc}`;
+      await sendWhatsApp(p.mobile, msg);
+    }
+  }
 }
 
 // ── HELPERS ──
