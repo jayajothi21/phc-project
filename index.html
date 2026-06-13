@@ -125,12 +125,10 @@ tr:hover td{background:#fafffe;}
 .waiting-info{background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px 14px;font-size:12px;color:#856404;margin-bottom:14px;}
 .role-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;}
 .role-district_admin{background:#e8eaf6;color:#3949ab;}
-.role-phc_admin{background:#e0f2f1;color:#00796b;}
 .role-doctor{background:#e3f2fd;color:#1565c0;}
 .role-pharmacist{background:#f3e5f5;color:#7b1fa2;}
-.role-staff,.role-receptionist{background:#e8f5e9;color:#2e7d32;}
+.role-staff{background:#e8f5e9;color:#2e7d32;}
 .role-anm{background:#fce4ec;color:#c2185b;}
-.role-ddhs{background:#fff3e0;color:#e65100;}
 @media print{body *{visibility:hidden;}#printTokenSlip,#printTokenSlip *{visibility:visible;}#printTokenSlip{position:fixed;left:0;top:0;width:80mm;padding:8mm;}.no-print{display:none!important;}}
 </style>
 </head>
@@ -155,13 +153,10 @@ tr:hover td{background:#fafffe;}
     <div style="background:#f0f8f4;border-radius:9px;padding:11px;margin-bottom:14px;font-size:11px;color:var(--text-light);">
       <strong style="color:var(--primary);">Login Accounts:</strong><br>
       🏛 District Admin: admin@district.com / admin123<br>
-      🏥 PHC Admin: phcadmin@phc.com / phcadmin123<br>
       🩺 Doctor: doctor@phc.com / doctor123<br>
       👤 Staff: staff@phc.com / staff123<br>
       🤰 ANM: anm@phc.com / anm123<br>
-      💊 Pharmacist: pharma@phc.com / pharma123<br>
-      📋 Receptionist: reception@phc.com / reception123<br>
-      🏛 DDHS: ddhs@phc.com / ddhs123
+      💊 Pharmacist: pharma@phc.com / pharma123
     </div>
     <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">🔐 Login to System</button>
     <div id="loginError" style="background:#ffe8e8;color:var(--danger);padding:9px 13px;border-radius:8px;font-size:12px;margin-top:10px;display:none;"></div>
@@ -300,19 +295,26 @@ const PHC_COORDS = {
 
 const PHC_LIST = Object.keys(PHC_COORDS);
 
+// ── DISTRICT GROUPING (for District Admin multi-district/PHC selector) ──
+const DISTRICTS = {
+  'Virudhunagar': ['Virudhunagar Main PHC','Aruppukottai PHC','Sivakasi PHC','Rajapalayam PHC','Srivilliputhur PHC','Sattur PHC','Thiruchuli PHC','Kariapatti PHC'],
+};
+const DISTRICT_LIST = Object.keys(DISTRICTS);
+
+// District Admin's current selection (session-only)
+let selectedDistrict = null;
+let selectedPHC = null;
+
 // ── ROLE CONFIG ──
-const ROLE_ICONS = {district_admin:'🏛',phc_admin:'🏥',doctor:'🩺',pharmacist:'💊',staff:'👤',receptionist:'📋',anm:'🤰',ddhs:'🏛'};
-const ROLE_LABELS = {district_admin:'District Admin',phc_admin:'PHC Admin',doctor:'Doctor',pharmacist:'Pharmacist',staff:'Staff',receptionist:'Receptionist',anm:'ANM',ddhs:'DDHS'};
+const ROLE_ICONS = {district_admin:'🏛',doctor:'🩺',pharmacist:'💊',staff:'👤',anm:'🤰'};
+const ROLE_LABELS = {district_admin:'District Admin',doctor:'Doctor',pharmacist:'Pharmacist',staff:'Staff',anm:'ANM'};
 
 const NAV_CONFIG = {
-  district_admin: [{id:'dashboard',icon:'📊',label:'District Dashboard'},{id:'phc_list',icon:'🏥',label:'All PHCs'},{id:'allpatients',icon:'👥',label:'All Patients'},{id:'allstaff',icon:'👤',label:'All Staff'},{id:'reports',icon:'📈',label:'Reports'},{id:'audit',icon:'📋',label:'Audit Log'}],
-  phc_admin:      [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'register',icon:'📋',label:'Register Patient'},{id:'queue',icon:'🎫',label:'Token Queue'},{id:'medicine',icon:'💊',label:'Medicine Stock'},{id:'attendance',icon:'📅',label:'Attendance'},{id:'reports',icon:'📈',label:'PHC Reports'}],
+  district_admin: [{id:'dashboard',icon:'📊',label:'District Dashboard'},{id:'phc_selector',icon:'🗺️',label:'Select District/PHC'},{id:'phc_performance',icon:'📈',label:'PHC Performance'},{id:'phc_list',icon:'🏥',label:'All PHCs'},{id:'allpatients',icon:'👥',label:'All Patients'},{id:'allstaff',icon:'👤',label:'All Staff'},{id:'reports',icon:'📈',label:'Reports'},{id:'audit',icon:'📋',label:'Audit Log'}],
   doctor:         [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'docqueue',icon:'🩺',label:'My Queue'},{id:'prescription',icon:'📝',label:'Prescriptions'},{id:'pathistory',icon:'📂',label:'Patient History'},{id:'pregnancy',icon:'🤰',label:'Pregnancy'},{id:'attendance',icon:'📅',label:'Attendance'}],
   pharmacist:     [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'pharmacy',icon:'💊',label:'Dispense Medicine'},{id:'medicine',icon:'📦',label:'Stock Management'},{id:'stock_txn',icon:'📜',label:'Stock History'},{id:'attendance',icon:'📅',label:'Attendance'}],
   staff:          [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'register',icon:'📋',label:'Register Patient'},{id:'queue',icon:'🎫',label:'Token Queue'},{id:'medicine',icon:'💊',label:'Medicine Stock'},{id:'whatsapp',icon:'📱',label:'WhatsApp'},{id:'attendance',icon:'📅',label:'Attendance'}],
-  receptionist:   [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'register',icon:'📋',label:'Register Patient'},{id:'queue',icon:'🎫',label:'Token Queue'},{id:'attendance',icon:'📅',label:'Attendance'}],
   anm:            [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'pregnancy',icon:'🤰',label:'Pregnancy Module'},{id:'vaccination',icon:'💉',label:'Vaccination'},{id:'register',icon:'📋',label:'Register Patient'},{id:'whatsapp',icon:'📱',label:'WhatsApp'},{id:'attendance',icon:'📅',label:'Attendance'}],
-  ddhs:           [{id:'dashboard',icon:'📊',label:'District Dashboard'},{id:'phc_list',icon:'🏥',label:'All PHCs'},{id:'allpatients',icon:'👥',label:'All Patients'},{id:'pregnancy',icon:'🤰',label:'Pregnancy'},{id:'vaccination',icon:'💉',label:'Vaccination'},{id:'medicine',icon:'💊',label:'Medicine'},{id:'whatsapp',icon:'📱',label:'WhatsApp'},{id:'attendance',icon:'📅',label:'Attendance'},{id:'reports',icon:'📈',label:'Reports'}],
 };
 
 // ── HELPERS ──
@@ -351,7 +353,7 @@ async function handleLogin(){
     }
     // GPS for non-district roles
     let distanceFromPHC=null,locationStatus='location_off',gpsNote='';
-    if(data.role!=='district_admin'&&data.role!=='ddhs'){
+    if(data.role!=='district_admin'){
       btn.textContent='📍 Getting location...';
       const gps=await getGPS();
       if(gps){
@@ -369,7 +371,7 @@ async function handleLogin(){
       }
     }
     currentUser=data;
-    if(data.role!=='district_admin'&&data.role!=='ddhs'){
+    if(data.role!=='district_admin'){
       await db.from('attendance').insert({user_name:data.name,role:data.role,phc:data.phc,check_in:new Date().toTimeString().slice(0,5),status:(locationStatus==='within_phc'||locationStatus==='location_off')?'present':'outside_phc',latitude:currentLocation?.lat||null,longitude:currentLocation?.lng||null,distance_from_phc:distanceFromPHC,location_note:gpsNote||null});
     }
     await auditLog('LOGIN','users',data.id,`${data.role} logged in from ${data.phc}`);
@@ -398,9 +400,9 @@ function setupSidebar(){
 function navigateTo(page){
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
   const nEl=document.getElementById('nav-'+page);if(nEl)nEl.classList.add('active');
-  const titles={dashboard:'Dashboard',register:'Register Patient',queue:'Token Queue',docqueue:'Doctor Queue',prescription:'Prescriptions',pathistory:'Patient History',pregnancy:'Pregnancy Module',vaccination:'Vaccination',medicine:'Medicine Stock',pharmacy:'Dispense Medicine',whatsapp:'WhatsApp Center',attendance:'Attendance',phc_list:'All PHCs',allpatients:'All Patients',allstaff:'All Staff',reports:'Reports',audit:'Audit Log',stock_txn:'Stock History',myhistory:'My History',myprescriptions:'My Prescriptions',myvaccination:'Vaccination Schedule'};
+  const titles={dashboard:'Dashboard',register:'Register Patient',queue:'Token Queue',docqueue:'Doctor Queue',prescription:'Prescriptions',pathistory:'Patient History',pregnancy:'Pregnancy Module',vaccination:'Vaccination',medicine:'Medicine Stock',pharmacy:'Dispense Medicine',whatsapp:'WhatsApp Center',attendance:'Attendance',phc_list:'All PHCs',allpatients:'All Patients',allstaff:'All Staff',reports:'Reports',audit:'Audit Log',stock_txn:'Stock History',myhistory:'My History',myprescriptions:'My Prescriptions',myvaccination:'Vaccination Schedule',phc_selector:'Select District / PHC',phc_performance:'PHC Performance Dashboard'};
   document.getElementById('pageTitle').textContent=titles[page]||page;
-  const pages={dashboard:loadDashboard,register:loadRegister,queue:loadQueue,docqueue:loadDocQueue,prescription:loadPrescription,pathistory:loadPatHistory,pregnancy:loadPregnancy,vaccination:loadVaccination,medicine:loadMedicine,pharmacy:loadPharmacy,whatsapp:loadWhatsApp,attendance:loadAttendance,phc_list:loadAllPHCs,allpatients:loadAllPatients,allstaff:loadAllStaff,reports:loadReports,audit:loadAudit,stock_txn:loadStockTxn,myhistory:loadMyHistory,myprescriptions:loadMyPrescriptions,myvaccination:loadMyVaccination};
+  const pages={dashboard:loadDashboard,register:loadRegister,queue:loadQueue,docqueue:loadDocQueue,prescription:loadPrescription,pathistory:loadPatHistory,pregnancy:loadPregnancy,vaccination:loadVaccination,medicine:loadMedicine,pharmacy:loadPharmacy,whatsapp:loadWhatsApp,attendance:loadAttendance,phc_list:loadAllPHCs,allpatients:loadAllPatients,allstaff:loadAllStaff,reports:loadReports,audit:loadAudit,stock_txn:loadStockTxn,myhistory:loadMyHistory,myprescriptions:loadMyPrescriptions,myvaccination:loadMyVaccination,phc_selector:loadPHCSelector,phc_performance:loadPHCPerformance};
   if(pages[page])pages[page]();
 }
 
@@ -470,7 +472,7 @@ function printTokenSlip(){
 async function loadDashboard(){
   const c=document.getElementById('mainContent');
   c.innerHTML='<div class="loading"><div class="spinner"></div>Loading dashboard...</div>';
-  const isDistrict=['district_admin','ddhs'].includes(currentUser.role);
+  const isDistrict=currentUser.role==='district_admin';
   const today=new Date().toISOString().slice(0,10);
 
   if(isDistrict){
@@ -815,7 +817,9 @@ function toggleVoice(){
   recognition.start();
 }
 
+let _rxSaving=false;
 async function savePrescription(sendToPharm){
+  if(_rxSaving)return;
   const patient=document.getElementById('rx_patient').value.trim();
   const mobile=document.getElementById('rx_mobile').value.trim();
   const diag=document.getElementById('rx_diagnosis').value.trim();
@@ -825,15 +829,38 @@ async function savePrescription(sendToPharm){
   const rows=document.querySelectorAll('.rx-med-row');
   const meds=[];
   rows.forEach(row=>{const inputs=row.querySelectorAll('input,select');if(inputs[0]?.value?.trim())meds.push({name:inputs[0].value,dosage:inputs[1].value,timing:inputs[2].value,days:inputs[3].value});});
-  const rxData={patient_name:patient,patient_mobile:mobile,diagnosis:diag,medicines:JSON.stringify(meds),medicines_count:meds.length,notes,follow_up_date:followup||null,doctor_name:currentUser.name,phc:currentUser.phc,dispensed:false};
-  const {data:rx,error}=await db.from('prescriptions').insert(rxData).select().single();
-  if(error){showAlert('rxAlert','error','Error: '+error.message);return;}
+
+  _rxSaving=true;
+  showAlert('rxAlert','info','Saving...');
+
+  // Extract token number if patient field looks like "T-001" or contains it
+  let patientToken='';
+  const tokenMatch=patient.match(/T-?\d+/i);
+  if(tokenMatch)patientToken=tokenMatch[0].toUpperCase().replace(/^T-?/,'T-');
+
+  const rxData={patient_name:patient,patient_token:patientToken,patient_mobile:mobile,diagnosis:diag,medicines:JSON.stringify(meds),medicines_count:meds.length,notes,follow_up_date:followup||null,doctor_name:currentUser.name,phc:currentUser.phc,dispensed:false};
+
+  let rx=null,error=null;
+  try{
+    const res=await db.from('prescriptions').insert(rxData).select().single();
+    rx=res.data;error=res.error;
+  }catch(e){error=e;}
+
+  if(error){
+    showAlert('rxAlert','error','Error: '+(error.message||'Could not save prescription. Please try again.'));
+    _rxSaving=false;
+    return;
+  }
+
   await auditLog('CREATE_PRESCRIPTION','prescriptions',rx?.id,`Patient:${patient} Meds:${meds.length}`);
+
   if(mobile&&meds.length>0){
     const medList=meds.map(m=>`• ${m.name} ${m.dosage} — ${m.timing} × ${m.days}d`).join('\n');
     await sendWhatsApp(mobile,`🏥 *${currentUser.phc}*\n\nவணக்கம் ${patient}!\n\n📋 Diagnosis: ${diag}\n💊 Medicines:\n${medList}\n📅 Follow-up: ${followup||'As needed'}\n\n${currentUser.phc}`);
   }
+
   showAlert('rxAlert','success',`✅ Prescription saved! (${meds.length} medicines)${sendToPharm?' → Sent to Pharmacy':''}`);
+  _rxSaving=false;
   setTimeout(()=>loadPrescription(),2000);
 }
 
@@ -914,7 +941,7 @@ async function dispensePrescription(rxId,patName,mobile,btn){
 async function loadMedicine(){
   const c=document.getElementById('mainContent');
   c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
-  const phcFilter=(['district_admin','ddhs'].includes(currentUser.role))?null:currentUser.phc;
+  const phcFilter=(currentUser.role==='district_admin')?null:currentUser.phc;
   let query=db.from('medicine').select('*').order('name');
   if(phcFilter)query=query.eq('phc',phcFilter);
   const {data}=await query;
@@ -923,7 +950,7 @@ async function loadMedicine(){
   ${low.length>0?`<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:9px;padding:12px;margin-bottom:16px;font-size:12px;color:#856404;">⚠️ <strong>${low.length} medicines</strong> low/critical: ${low.map(m=>m.name).join(', ')}</div>`:''}
   <div class="section-card">
     <div class="section-header"><h3>💊 Medicine Stock — ${phcFilter||'All PHCs'}</h3>
-      ${currentUser.role==='pharmacist'||currentUser.role==='phc_admin'?`<button class="btn btn-success btn-sm" onclick="document.getElementById('stockModal').classList.add('open')">+ Add Stock</button>`:''}
+      ${currentUser.role==='pharmacist'?`<button class="btn btn-success btn-sm" onclick="document.getElementById('stockModal').classList.add('open')">+ Add Stock</button>`:''}
     </div>
     <div class="section-body" style="overflow-x:auto;">
       <table><tr><th>Medicine</th><th>Category</th><th>Batch</th><th>Stock</th><th>Min</th><th>Expiry</th><th>PHC</th><th>Status</th></tr>
@@ -989,7 +1016,7 @@ async function loadStockTxn(){
 async function loadPregnancy(){
   const c=document.getElementById('mainContent');
   c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
-  const phcFilter=['district_admin','ddhs'].includes(currentUser.role)?null:currentUser.phc;
+  const phcFilter=currentUser.role==='district_admin'?null:currentUser.phc;
   let q=db.from('pregnancy').select('*').order('created_at',{ascending:false});
   if(phcFilter)q=q.eq('phc',phcFilter);
   const {data}=await q;
@@ -1041,7 +1068,7 @@ async function sendPregReminder(mobile,name,uid,weeks,edd){
 }
 
 async function sendMonthlyReminders(){
-  const phcFilter=['district_admin','ddhs'].includes(currentUser.role)?null:currentUser.phc;
+  const phcFilter=currentUser.role==='district_admin'?null:currentUser.phc;
   let q=db.from('pregnancy').select('*').eq('status','active');
   if(phcFilter)q=q.eq('phc',phcFilter);
   const {data}=await q;
@@ -1081,7 +1108,7 @@ const VACCINES=[{name:'BCG',age:'At birth',disease:'TB'},{name:'OPV 0',age:'At b
 
 async function loadVaccination(){
   const c=document.getElementById('mainContent');
-  const phcFilter=['district_admin','ddhs'].includes(currentUser.role)?null:currentUser.phc;
+  const phcFilter=currentUser.role==='district_admin'?null:currentUser.phc;
   let q=db.from('pregnancy').select('*').eq('status','active');
   if(phcFilter)q=q.eq('phc',phcFilter);
   const {data:pregList}=await q;
@@ -1114,7 +1141,7 @@ async function sendVaccineAlert(mobile,name,weeks){
 }
 
 async function sendVaccineReminders(){
-  const phcFilter=['district_admin','ddhs'].includes(currentUser.role)?null:currentUser.phc;
+  const phcFilter=currentUser.role==='district_admin'?null:currentUser.phc;
   let q=db.from('pregnancy').select('*').eq('status','active');
   if(phcFilter)q=q.eq('phc',phcFilter);
   const {data}=await q;
@@ -1130,7 +1157,7 @@ async function loadAttendance(){
   const c=document.getElementById('mainContent');
   c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   const today=new Date().toISOString().slice(0,10);
-  const phcFilter=['district_admin','ddhs'].includes(currentUser.role)?null:currentUser.phc;
+  const phcFilter=currentUser.role==='district_admin'?null:currentUser.phc;
   let q=db.from('attendance').select('*').order('created_at',{ascending:false}).limit(50);
   if(phcFilter)q=q.eq('phc',phcFilter);
   const {data}=await q;
@@ -1196,6 +1223,165 @@ async function loadAllPHCs(){
   </div>`;
 }
 
+// ══════════════════════════════════════════
+// DISTRICT ADMIN — DISTRICT & PHC SELECTOR
+// ══════════════════════════════════════════
+function loadPHCSelector(){
+  const c=document.getElementById('mainContent');
+  c.innerHTML=`
+  <div class="section-card" style="margin-bottom:18px;">
+    <div class="section-header"><h3>🗺️ Select District</h3></div>
+    <div class="section-body">
+      <div class="stats-grid">
+        ${DISTRICT_LIST.map(d=>`<div class="stat-card" style="cursor:pointer;${selectedDistrict===d?'border-color:var(--primary);box-shadow:0 0 0 2px rgba(26,107,60,.15);':''}" onclick="selectDistrict('${d}')">
+          <div class="stat-icon blue">🏛</div>
+          <div class="stat-info"><div class="value" style="font-size:15px;">${d}</div><div class="label">${DISTRICTS[d].length} PHCs</div></div>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>
+  <div class="section-card">
+    <div class="section-header"><h3>🏥 Select PHC ${selectedDistrict?'— '+selectedDistrict:''}</h3></div>
+    <div class="section-body">
+      ${!selectedDistrict?'<p style="color:var(--text-light);font-size:13px;">Select a district above first.</p>':
+      `<div class="stats-grid">
+        ${DISTRICTS[selectedDistrict].map(phc=>`<div class="stat-card" style="cursor:pointer;${selectedPHC===phc?'border-color:var(--primary);box-shadow:0 0 0 2px rgba(26,107,60,.15);':''}" onclick="selectPHC('${phc}')">
+          <div class="stat-icon green">🏥</div>
+          <div class="stat-info"><div class="value" style="font-size:14px;">${phc}</div><div class="label">View Performance →</div></div>
+        </div>`).join('')}
+      </div>`}
+    </div>
+  </div>`;
+}
+
+function selectDistrict(d){
+  selectedDistrict=d;
+  selectedPHC=null;
+  loadPHCSelector();
+}
+
+function selectPHC(phc){
+  selectedPHC=phc;
+  navigateTo('phc_performance');
+}
+
+// ══════════════════════════════════════════
+// DISTRICT ADMIN — PHC PERFORMANCE DASHBOARD
+// ══════════════════════════════════════════
+async function loadPHCPerformance(){
+  const c=document.getElementById('mainContent');
+  if(!selectedPHC){
+    c.innerHTML=`<div class="section-card"><div class="section-body">
+      <p style="color:var(--text-light);font-size:13px;">No PHC selected yet.</p>
+      <button class="btn btn-primary" style="width:auto;margin-top:10px;" onclick="navigateTo('phc_selector')">🗺️ Select District / PHC</button>
+    </div></div>`;
+    return;
+  }
+  c.innerHTML='<div class="loading"><div class="spinner"></div>Loading PHC performance...</div>';
+  const phc=selectedPHC;
+  const today=new Date().toISOString().slice(0,10);
+
+  const [patientsRes,pregRes,attRes,medRes,rxRes,compPatRes,vaccRes]=await Promise.all([
+    db.from('patients').select('id,status',{count:'exact'}).eq('phc',phc),
+    db.from('pregnancy').select('*').eq('phc',phc),
+    db.from('attendance').select('*').eq('phc',phc).eq('date',today),
+    db.from('medicine').select('id,name,stock,min_level').eq('phc',phc),
+    db.from('prescriptions').select('id',{count:'exact'}).eq('phc',phc).eq('dispensed',false),
+    db.from('patients').select('waiting_minutes,consultation_minutes').eq('phc',phc).not('waiting_minutes','is',null).limit(100),
+    db.from('pregnancy').select('id',{count:'exact'}).eq('phc',phc).eq('status','active'),
+  ]);
+
+  const totalPat=patientsRes.count||0;
+  const waiting=(patientsRes.data||[]).filter(p=>p.status==='waiting').length;
+  const done=(patientsRes.data||[]).filter(p=>p.status==='done').length;
+  const pregData=pregRes.data||[];
+  const activePreg=pregData.filter(p=>p.status==='active').length;
+  const highRiskPreg=pregData.filter(p=>p.high_risk==='Yes').length;
+  const attData=attRes.data||[];
+  const medData=medRes.data||[];
+  const lowMed=medData.filter(m=>m.stock<=(m.min_level||10));
+  const compPat=compPatRes.data||[];
+  const avgWait=compPat.length>0?Math.round(compPat.reduce((s,p)=>s+(p.waiting_minutes||0),0)/compPat.length):0;
+  const avgConsult=compPat.length>0?Math.round(compPat.reduce((s,p)=>s+(p.consultation_minutes||0),0)/compPat.length):0;
+  const pendingRx=rxRes.count||0;
+
+  c.innerHTML=`
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div style="font-size:13px;color:var(--text-light);">📍 ${selectedDistrict} District</div>
+    <button class="btn btn-outline btn-sm" onclick="navigateTo('phc_selector')">🔄 Change PHC</button>
+  </div>
+  <div class="section-card" style="margin-bottom:18px;">
+    <div class="section-header"><h3>🏥 ${phc} — Performance Overview</h3></div>
+    <div class="section-body">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon green">👥</div><div class="stat-info"><div class="value">${totalPat}</div><div class="label">Total Patients</div></div></div>
+        <div class="stat-card"><div class="stat-icon orange">⏳</div><div class="stat-info"><div class="value">${waiting}</div><div class="label">Waiting Now</div></div></div>
+        <div class="stat-card"><div class="stat-icon teal">✅</div><div class="stat-info"><div class="value">${done}</div><div class="label">Consultations Done</div></div></div>
+        <div class="stat-card"><div class="stat-icon purple">🤰</div><div class="stat-info"><div class="value">${activePreg}</div><div class="label">Active Pregnancy</div></div></div>
+        <div class="stat-card"><div class="stat-icon red">⚠️</div><div class="stat-info"><div class="value">${highRiskPreg}</div><div class="label">High Risk Pregnancy</div></div></div>
+        <div class="stat-card"><div class="stat-icon blue">👤</div><div class="stat-info"><div class="value">${attData.length}</div><div class="label">Staff Present Today</div></div></div>
+        <div class="stat-card"><div class="stat-icon indigo">📝</div><div class="stat-info"><div class="value">${pendingRx}</div><div class="label">Pending Prescriptions</div></div></div>
+        <div class="stat-card"><div class="stat-icon red">💊</div><div class="stat-info"><div class="value">${lowMed.length}</div><div class="label">Low Stock Medicines</div></div></div>
+        <div class="stat-card"><div class="stat-icon orange">⏱️</div><div class="stat-info"><div class="value">${avgWait}m</div><div class="label">Avg Wait Time</div></div></div>
+        <div class="stat-card"><div class="stat-icon teal">🩺</div><div class="stat-info"><div class="value">${avgConsult}m</div><div class="label">Avg Consult Time</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card" style="margin-bottom:18px;">
+    <div class="section-header"><h3>📅 Staff Attendance — Today</h3></div>
+    <div class="section-body" style="overflow-x:auto;">
+      ${attData.length===0?'<p style="color:var(--text-light);font-size:13px;">No attendance records for today.</p>':
+      `<table><tr><th>Name</th><th>Role</th><th>Check-in</th><th>Location Status</th></tr>
+      ${attData.map(a=>`<tr>
+        <td><strong>${a.user_name}</strong></td>
+        <td><span class="role-badge role-${a.role}">${a.role}</span></td>
+        <td>${a.check_in||'-'}</td>
+        <td>${a.status==='within_phc'||a.status==='present'?`<span class="badge badge-active">📍 Within PHC${a.distance_from_phc!=null?' · '+a.distance_from_phc+'m':''}</span>`:a.status==='outside_phc'?`<span class="badge badge-critical">⚠️ Outside · ${a.distance_from_phc||'?'}m</span>`:`<span class="badge badge-waiting">📵 No GPS</span>`}</td>
+      </tr>`).join('')}
+      </table>`}
+    </div>
+  </div>
+
+  <div class="section-card" style="margin-bottom:18px;">
+    <div class="section-header"><h3>💊 Medicine Stock Summary</h3></div>
+    <div class="section-body" style="overflow-x:auto;">
+      ${medData.length===0?'<p style="color:var(--text-light);font-size:13px;">No medicine stock data.</p>':
+      `<table><tr><th>Medicine</th><th>Stock</th><th>Min Level</th><th>Status</th></tr>
+      ${medData.map(m=>{
+        const badge=m.stock<=(m.min_level||10)/2?'badge-critical':m.stock<=(m.min_level||10)?'badge-low':'badge-ok';
+        const label=m.stock<=(m.min_level||10)/2?'Critical':m.stock<=(m.min_level||10)?'Low':'OK';
+        return`<tr><td><strong>${m.name}</strong></td><td>${m.stock}</td><td>${m.min_level||10}</td><td><span class="badge ${badge}">${label}</span></td></tr>`;
+      }).join('')}
+      </table>`}
+    </div>
+  </div>
+
+  <div class="section-card" style="margin-bottom:18px;">
+    <div class="section-header"><h3>🤰 Pregnancy Cases</h3></div>
+    <div class="section-body" style="overflow-x:auto;">
+      ${pregData.length===0?'<p style="color:var(--text-light);font-size:13px;">No pregnancy cases.</p>':
+      `<table><tr><th>ID</th><th>Name</th><th>Week</th><th>EDD</th><th>High Risk</th><th>Status</th></tr>
+      ${pregData.map(p=>{
+        const weeks=Math.floor((Date.now()-new Date(p.lmp_date))/(7*24*60*60*1000));
+        return`<tr><td><strong>${p.unique_id}</strong></td><td>${p.name}</td><td>${weeks}</td><td style="font-size:11px;">${p.edd}</td><td><span class="badge ${p.high_risk==='Yes'?'badge-critical':'badge-active'}">${p.high_risk==='Yes'?'High Risk':'Normal'}</span></td><td><span class="badge badge-${p.status==='active'?'active':'done'}">${p.status}</span></td></tr>`;
+      }).join('')}
+      </table>`}
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header"><h3>💉 Vaccination — National Schedule (Reference)</h3></div>
+    <div class="section-body" style="overflow-x:auto;">
+      <table><tr><th>Vaccine</th><th>Age</th><th>Disease</th></tr>
+      ${VACCINES.slice(0,6).map(v=>`<tr><td><strong>${v.name}</strong></td><td><span class="badge badge-active">${v.age}</span></td><td style="font-size:11px;color:var(--text-light);">${v.disease}</td></tr>`).join('')}
+      </table>
+      <div style="font-size:11px;color:var(--text-light);margin-top:8px;">Showing first 6 of ${VACCINES.length} vaccines. ${activePreg} active pregnancy case(s) eligible for reminders.</div>
+    </div>
+  </div>`;
+}
+
+
 async function loadAllPatients(){
   const c=document.getElementById('mainContent');
   c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
@@ -1253,7 +1439,7 @@ async function loadAllStaff(){
 async function loadReports(){
   const c=document.getElementById('mainContent');
   c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
-  const isDistrict=['district_admin','ddhs'].includes(currentUser.role);
+  const isDistrict=currentUser.role==='district_admin';
   const phcList=isDistrict?PHC_LIST:[currentUser.phc];
   const results=await Promise.all(phcList.map(async phc=>{
     const [{count:totalPat},{count:preg},{data:compPat}]=await Promise.all([
