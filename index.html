@@ -1,156 +1,147 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Virudhunagar PHC Management System</title>
+<title>Virudhunagar District PHC Management System</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap');
-  :root {
-    --primary:#1a6b3c;--primary-light:#2d9e5f;--primary-dark:#0f4a29;
-    --accent:#f0a500;--danger:#e63946;--warning:#f4a261;--success:#2a9d8f;
-    --bg:#f0f4f1;--text:#1a2e22;--text-light:#5a7a65;--border:#d0e4d8;--sidebar-w:240px;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Poppins','Noto Sans Tamil',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-  #loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(135deg,#0f4a29 0%,#1a6b3c 50%,#2d9e5f 100%);position:relative;overflow:hidden;}
-  #loginPage::before{content:'';position:absolute;width:500px;height:500px;background:rgba(255,255,255,.04);border-radius:50%;top:-150px;right:-150px;}
-  .login-box{background:white;border-radius:20px;padding:48px 40px;width:420px;box-shadow:0 30px 80px rgba(0,0,0,.3);position:relative;z-index:1;}
-  .login-logo{text-align:center;margin-bottom:32px;}
-  .login-logo .emblem{width:70px;height:70px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 12px;box-shadow:0 8px 24px rgba(26,107,60,.3);}
-  .login-logo h2{font-size:18px;font-weight:700;color:var(--primary);line-height:1.3;}
-  .login-logo p{font-size:13px;color:var(--text-light);margin-top:4px;}
-  .form-group{margin-bottom:18px;}
-  .form-group label{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;}
-  .form-group input,.form-group select,.form-group textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--text);background:#fafffe;transition:border-color .2s,box-shadow .2s;outline:none;}
-  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,107,60,.1);}
-  .btn{padding:11px 20px;border:none;border-radius:10px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
-  .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;width:100%;justify-content:center;padding:13px;font-size:15px;box-shadow:0 4px 15px rgba(26,107,60,.3);}
-  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,107,60,.4);}
-  .btn-success{background:var(--success);color:white;}
-  .btn-danger{background:var(--danger);color:white;}
-  .btn-warning{background:var(--warning);color:white;}
-  .btn-whatsapp{background:#25D366;color:white;}
-  .btn-whatsapp:hover{background:#128C7E;}
-  .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text);}
-  .btn-outline:hover{border-color:var(--primary);color:var(--primary);}
-  .btn-sm{padding:6px 12px;font-size:12px;}
-  .btn-print{background:linear-gradient(135deg,#1565C0,#1976D2);color:white;}
-  #app{display:none;min-height:100vh;}
-  .sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,var(--primary-dark) 0%,var(--primary) 100%);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:100;box-shadow:4px 0 20px rgba(0,0,0,.15);}
-  .sidebar-header{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.1);}
-  .sidebar-header h3{color:white;font-size:13px;font-weight:700;}
-  .sidebar-header p{color:rgba(255,255,255,.6);font-size:11px;margin-top:2px;}
-  .user-badge{margin:12px 16px;background:rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
-  .user-avatar{width:36px;height:36px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-  .user-info strong{color:white;font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .user-info span{color:rgba(255,255,255,.6);font-size:10px;text-transform:uppercase;letter-spacing:.5px;}
-  .nav-section{padding:8px 0;flex:1;overflow-y:auto;}
-  .nav-label{padding:8px 16px 4px;font-size:10px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:1px;text-transform:uppercase;}
-  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;color:rgba(255,255,255,.75);cursor:pointer;transition:all .2s;font-size:13px;font-weight:500;border-left:3px solid transparent;margin:1px 0;}
-  .nav-item:hover{background:rgba(255,255,255,.08);color:white;}
-  .nav-item.active{background:rgba(255,255,255,.15);color:white;border-left-color:var(--accent);}
-  .nav-item .icon{font-size:16px;width:20px;text-align:center;}
-  .sidebar-footer{padding:12px 16px;border-top:1px solid rgba(255,255,255,.1);}
-  .logout-btn{width:100%;padding:9px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.7);cursor:pointer;font-size:13px;font-family:inherit;transition:all .2s;}
-  .logout-btn:hover{background:rgba(230,57,70,.3);color:white;}
-  .main{margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column;}
-  .topbar{background:white;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.06);}
-  .topbar h1{font-size:18px;font-weight:700;}
-  .topbar-right{display:flex;align-items:center;gap:12px;}
-  .time-badge{background:var(--bg);padding:6px 12px;border-radius:8px;font-size:12px;color:var(--text-light);font-weight:500;}
-  .content{padding:28px;flex:1;}
-  .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
-  .stat-card{background:white;border-radius:14px;padding:20px;border:1px solid var(--border);display:flex;align-items:flex-start;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.04);transition:transform .2s,box-shadow .2s;}
-  .stat-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08);}
-  .stat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
-  .stat-icon.green{background:#e8f5ee;}.stat-icon.blue{background:#e8f0fe;}.stat-icon.orange{background:#fff3e0;}.stat-icon.red{background:#fce8e8;}.stat-icon.purple{background:#f3e8ff;}.stat-icon.teal{background:#e0f7f4;}
-  .stat-info .value{font-size:26px;font-weight:700;line-height:1;}
-  .stat-info .label{font-size:12px;color:var(--text-light);margin-top:4px;}
-  .section-card{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:20px;}
-  .section-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#fafffe;}
-  .section-header h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
-  .section-body{padding:20px;}
-  table{width:100%;border-collapse:collapse;}
-  th{background:var(--bg);padding:10px 14px;text-align:left;font-size:12px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;}
-  td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text);}
-  tr:last-child td{border-bottom:none;}
-  tr:hover td{background:#fafffe;}
-  .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
-  .badge-waiting{background:#fff3cd;color:#856404;}
-  .badge-with-doctor{background:#d1ecf1;color:#0c5460;}
-  .badge-done{background:#d4edda;color:#155724;}
-  .badge-active{background:#d4edda;color:#155724;}
-  .badge-critical{background:#fce8e8;color:#c0392b;}
-  .badge-ok{background:#d4edda;color:#155724;}
-  .badge-low{background:#fff3cd;color:#856404;}
-  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  .form-grid .full{grid-column:1/-1;}
-  .loading{text-align:center;padding:40px;color:var(--text-light);font-size:14px;}
-  .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .alert{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none;}
-  .alert-success{background:#d4edda;color:#155724;border:1px solid #c3e6cb;}
-  .alert-error{background:#fce8e8;color:#c0392b;border:1px solid #f5c6cb;}
-  .alert-info{background:#d1ecf1;color:#0c5460;border:1px solid #bee5eb;}
-  .queue-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:10px;border:1px solid var(--border);margin-bottom:10px;cursor:pointer;transition:all .2s;background:white;}
-  .queue-item:hover{border-color:var(--primary);box-shadow:0 2px 10px rgba(26,107,60,.1);}
-  .token-badge{width:44px;height:44px;background:var(--primary);color:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;}
-  .preg-card{border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;background:white;transition:all .2s;}
-  .preg-card:hover{border-color:var(--primary);box-shadow:0 2px 10px rgba(26,107,60,.1);}
-  .preg-id{font-weight:700;color:var(--primary);font-size:14px;margin-bottom:4px;}
-  .preg-meta{font-size:12px;color:var(--text-light);margin-bottom:8px;}
-  .progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:10px;}
-  .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:3px;}
-  .wa-log{background:#e8f5e9;border:1px solid #a5d6a7;border-radius:10px;padding:12px 16px;margin-bottom:10px;font-size:13px;}
-  .wa-log .wa-to{font-weight:700;color:#1b5e20;margin-bottom:4px;}
-  .wa-log .wa-msg{color:#2e7d32;white-space:pre-wrap;}
-  .wa-log .wa-time{font-size:11px;color:#66bb6a;margin-top:6px;}
-  .wa-status{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;}
-  .wa-sent{background:#d4edda;color:#155724;}
-  .wa-failed{background:#fce8e8;color:#c0392b;}
-  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;}
-  .modal-overlay.open{display:flex;}
-  .modal{background:white;border-radius:16px;width:90%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.3);}
-  .modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-  .modal-header h3{font-size:16px;font-weight:700;}
-  .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);}
-  .modal-body{padding:24px;}
-  .modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
-  .wa-preview{background:#e5ddd5;border-radius:12px;padding:16px;margin-top:12px;}
-  .wa-bubble{background:white;border-radius:10px 10px 10px 0;padding:12px 14px;font-size:13px;color:#1a1a1a;box-shadow:0 1px 3px rgba(0,0,0,.1);max-width:90%;white-space:pre-wrap;line-height:1.5;}
-  .wa-bubble-header{font-size:11px;color:#25D366;font-weight:700;margin-bottom:6px;}
-  .token-slip-preview{border:2px dashed var(--border);border-radius:12px;padding:20px;background:linear-gradient(135deg,#f8fffe,#f0f8f4);margin-top:16px;}
-  .token-slip-card{background:white;border-radius:10px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.08);border-top:5px solid var(--primary);}
-  .slip-header{display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px dashed var(--border);margin-bottom:14px;}
-  .slip-emblem{width:44px;height:44px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;}
-  .slip-title{font-size:13px;font-weight:700;color:var(--primary);line-height:1.3;}
-  .slip-subtitle{font-size:10px;color:var(--text-light);}
-  .slip-token-big{text-align:center;padding:12px 0;}
-  .slip-token-num{font-size:52px;font-weight:700;color:var(--primary);line-height:1;}
-  .slip-token-label{font-size:11px;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
-  .slip-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0;}
-  .slip-detail-item{background:var(--bg);border-radius:6px;padding:8px 10px;}
-  .slip-detail-label{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;}
-  .slip-detail-value{font-size:13px;font-weight:600;color:var(--text);margin-top:2px;}
-  .slip-footer{text-align:center;font-size:11px;color:var(--text-light);padding-top:12px;border-top:1px dashed var(--border);}
-  @media print {
-    body * { visibility: hidden; }
-    #printTokenSlip, #printTokenSlip * { visibility: visible; }
-    #printTokenSlip { position: fixed; left: 0; top: 0; width: 80mm; padding: 8mm; }
-    .no-print { display: none !important; }
-  }
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+:root{
+  --primary:#1a6b3c;--primary-light:#2d9e5f;--primary-dark:#0f4a29;
+  --accent:#f0a500;--danger:#e63946;--warning:#f4a261;--success:#2a9d8f;
+  --bg:#f0f4f1;--text:#1a2e22;--text-light:#5a7a65;--border:#d0e4d8;--sidebar-w:250px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins','Noto Sans Tamil',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+#loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0f4a29 0%,#1a6b3c 50%,#2d9e5f 100%);position:relative;overflow:hidden;}
+.login-box{background:white;border-radius:20px;padding:40px;width:440px;box-shadow:0 30px 80px rgba(0,0,0,.3);position:relative;z-index:1;}
+.login-logo{text-align:center;margin-bottom:24px;}
+.login-logo .emblem{width:64px;height:64px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 10px;}
+.login-logo h2{font-size:17px;font-weight:700;color:var(--primary);line-height:1.3;}
+.login-logo p{font-size:12px;color:var(--text-light);margin-top:3px;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:inherit;color:var(--text);background:#fafffe;outline:none;transition:border-color .2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,107,60,.1);}
+.btn{padding:10px 18px;border:none;border-radius:9px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;width:100%;justify-content:center;padding:12px;font-size:14px;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(26,107,60,.3);}
+.btn-success{background:var(--success);color:white;}
+.btn-danger{background:var(--danger);color:white;}
+.btn-warning{background:var(--warning);color:white;}
+.btn-whatsapp{background:#25D366;color:white;}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text);}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary);}
+.btn-sm{padding:5px 11px;font-size:11px;}
+.btn-print{background:linear-gradient(135deg,#1565C0,#1976D2);color:white;}
+.btn-info{background:#0288d1;color:white;}
+#app{display:none;min-height:100vh;}
+.sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,var(--primary-dark) 0%,var(--primary) 100%);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:100;box-shadow:4px 0 20px rgba(0,0,0,.15);}
+.sidebar-header{padding:16px;border-bottom:1px solid rgba(255,255,255,.1);}
+.sidebar-header h3{color:white;font-size:13px;font-weight:700;}
+.sidebar-header p{color:rgba(255,255,255,.5);font-size:10px;margin-top:2px;}
+.user-badge{margin:10px 14px;background:rgba(255,255,255,.1);border-radius:9px;padding:9px 11px;display:flex;align-items:center;gap:9px;}
+.user-avatar{width:34px;height:34px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.user-info strong{color:white;font-size:11px;display:block;}
+.user-info span{color:rgba(255,255,255,.55);font-size:9px;text-transform:uppercase;letter-spacing:.5px;}
+.user-info .phc-name{color:rgba(255,255,255,.7);font-size:9px;margin-top:1px;}
+.nav-section{padding:6px 0;flex:1;overflow-y:auto;}
+.nav-label{padding:7px 14px 3px;font-size:9px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 14px;color:rgba(255,255,255,.72);cursor:pointer;transition:all .2s;font-size:12px;font-weight:500;border-left:3px solid transparent;margin:1px 0;}
+.nav-item:hover{background:rgba(255,255,255,.08);color:white;}
+.nav-item.active{background:rgba(255,255,255,.14);color:white;border-left-color:var(--accent);}
+.nav-item .icon{font-size:15px;width:18px;text-align:center;}
+.sidebar-footer{padding:10px 14px;border-top:1px solid rgba(255,255,255,.1);}
+.logout-btn{width:100%;padding:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:7px;color:rgba(255,255,255,.65);cursor:pointer;font-size:12px;font-family:inherit;transition:all .2s;}
+.logout-btn:hover{background:rgba(230,57,70,.3);color:white;}
+.main{margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column;}
+.topbar{background:white;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.topbar h1{font-size:16px;font-weight:700;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.time-badge{background:var(--bg);padding:5px 11px;border-radius:7px;font-size:11px;color:var(--text-light);font-weight:500;}
+.content{padding:24px;flex:1;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:20px;}
+.stat-card{background:white;border-radius:12px;padding:16px;border:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.04);transition:transform .2s;}
+.stat-card:hover{transform:translateY(-2px);}
+.stat-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.stat-icon.green{background:#e8f5ee;}.stat-icon.blue{background:#e8f0fe;}.stat-icon.orange{background:#fff3e0;}.stat-icon.red{background:#fce8e8;}.stat-icon.purple{background:#f3e8ff;}.stat-icon.teal{background:#e0f7f4;}.stat-icon.indigo{background:#e8eaf6;}
+.stat-info .value{font-size:24px;font-weight:700;line-height:1;}
+.stat-info .label{font-size:11px;color:var(--text-light);margin-top:3px;}
+.section-card{background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:18px;}
+.section-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#fafffe;}
+.section-header h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.section-body{padding:18px;}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--bg);padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.4px;}
+td{padding:10px 12px;font-size:12px;border-bottom:1px solid var(--border);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#fafffe;}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:18px;font-size:10px;font-weight:600;}
+.badge-waiting{background:#fff3cd;color:#856404;}
+.badge-done{background:#d4edda;color:#155724;}
+.badge-active{background:#d4edda;color:#155724;}
+.badge-critical{background:#fce8e8;color:#c0392b;}
+.badge-ok{background:#d4edda;color:#155724;}
+.badge-low{background:#fff3cd;color:#856404;}
+.badge-info{background:#d1ecf1;color:#0c5460;}
+.badge-dispensed{background:#d4edda;color:#155724;}
+.badge-pending{background:#fff3cd;color:#856404;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-grid .full{grid-column:1/-1;}
+.loading{text-align:center;padding:36px;color:var(--text-light);font-size:13px;}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.alert{padding:10px 14px;border-radius:9px;font-size:12px;margin-bottom:14px;display:none;}
+.alert-success{background:#d4edda;color:#155724;border:1px solid #c3e6cb;}
+.alert-error{background:#fce8e8;color:#c0392b;border:1px solid #f5c6cb;}
+.alert-info{background:#d1ecf1;color:#0c5460;border:1px solid #bee5eb;}
+.queue-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:9px;border:1px solid var(--border);margin-bottom:9px;cursor:pointer;transition:all .2s;background:white;}
+.queue-item:hover{border-color:var(--primary);box-shadow:0 2px 10px rgba(26,107,60,.1);}
+.token-badge{width:40px;height:40px;background:var(--primary);color:white;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;}
+.preg-card{border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;background:white;}
+.progress-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:8px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:3px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:white;border-radius:14px;width:90%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.3);}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-header h3{font-size:15px;font-weight:700;}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);}
+.modal-body{padding:22px;}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:9px;}
+.token-slip-preview{border:2px dashed var(--border);border-radius:10px;padding:18px;background:linear-gradient(135deg,#f8fffe,#f0f8f4);margin-top:14px;}
+.token-slip-card{background:white;border-radius:9px;padding:18px;box-shadow:0 2px 12px rgba(0,0,0,.08);border-top:4px solid var(--primary);}
+.slip-header{display:flex;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px dashed var(--border);margin-bottom:12px;}
+.slip-emblem{width:38px;height:38px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.slip-title{font-size:12px;font-weight:700;color:var(--primary);line-height:1.3;}
+.slip-subtitle{font-size:9px;color:var(--text-light);}
+.slip-token-num{font-size:48px;font-weight:700;color:var(--primary);line-height:1;text-align:center;padding:10px 0;}
+.slip-details{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:12px 0;}
+.slip-detail-item{background:var(--bg);border-radius:5px;padding:7px 9px;}
+.slip-detail-label{font-size:9px;color:var(--text-light);text-transform:uppercase;letter-spacing:.4px;}
+.slip-detail-value{font-size:12px;font-weight:600;color:var(--text);margin-top:1px;}
+.slip-footer{text-align:center;font-size:10px;color:var(--text-light);padding-top:10px;border-top:1px dashed var(--border);}
+.waiting-info{background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px 14px;font-size:12px;color:#856404;margin-bottom:14px;}
+.role-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;}
+.role-district_admin{background:#e8eaf6;color:#3949ab;}
+.role-phc_admin{background:#e0f2f1;color:#00796b;}
+.role-doctor{background:#e3f2fd;color:#1565c0;}
+.role-pharmacist{background:#f3e5f5;color:#7b1fa2;}
+.role-staff,.role-receptionist{background:#e8f5e9;color:#2e7d32;}
+.role-anm{background:#fce4ec;color:#c2185b;}
+.role-ddhs{background:#fff3e0;color:#e65100;}
+@media print{body *{visibility:hidden;}#printTokenSlip,#printTokenSlip *{visibility:visible;}#printTokenSlip{position:fixed;left:0;top:0;width:80mm;padding:8mm;}.no-print{display:none!important;}}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- LOGIN PAGE -->
 <div id="loginPage">
   <div class="login-box">
     <div class="login-logo">
       <div class="emblem">🏥</div>
-      <h2>Virudhunagar PHC<br>Management System</h2>
+      <h2>Virudhunagar District<br>PHC Management System</h2>
       <p>விருதுநகர் மாவட்ட முதன்மை சுகாதார மையம்</p>
     </div>
     <div class="form-group">
@@ -159,34 +150,37 @@
     </div>
     <div class="form-group">
       <label>Password</label>
-      <input type="password" id="loginPassword" placeholder="••••••••" value="staff123">
+      <input type="password" id="loginPassword" placeholder="••••••••" value="staff123" onkeydown="if(event.key==='Enter')handleLogin()">
     </div>
-    <div style="background:#f0f8f4;border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--text-light);">
-      <strong style="color:var(--primary);">Test Accounts:</strong><br>
-      👤 Staff: staff@phc.com / staff123<br>
+    <div style="background:#f0f8f4;border-radius:9px;padding:11px;margin-bottom:14px;font-size:11px;color:var(--text-light);">
+      <strong style="color:var(--primary);">Login Accounts:</strong><br>
+      🏛 District Admin: admin@district.com / admin123<br>
+      🏥 PHC Admin: phcadmin@phc.com / phcadmin123<br>
       🩺 Doctor: doctor@phc.com / doctor123<br>
+      👤 Staff: staff@phc.com / staff123<br>
       🤰 ANM: anm@phc.com / anm123<br>
       💊 Pharmacist: pharma@phc.com / pharma123<br>
-      🏛 DDHS: ddhs@phc.com / ddhs123<br>
-      🧑 Patient: <em>Mobile No. as email + unique ID as password</em>
+      📋 Receptionist: reception@phc.com / reception123<br>
+      🏛 DDHS: ddhs@phc.com / ddhs123
     </div>
     <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">🔐 Login to System</button>
-    <div id="loginError" style="background:#ffe8e8;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-top:12px;display:none;"></div>
+    <div id="loginError" style="background:#ffe8e8;color:var(--danger);padding:9px 13px;border-radius:8px;font-size:12px;margin-top:10px;display:none;"></div>
   </div>
 </div>
 
-<!-- APP -->
+<!-- MAIN APP -->
 <div id="app">
   <div class="sidebar">
     <div class="sidebar-header">
       <h3>🏥 VRD PHC System</h3>
-      <p>Virudhunagar District</p>
+      <p id="districtLabel">Virudhunagar District</p>
     </div>
     <div class="user-badge">
       <div class="user-avatar" id="sidebarAvatar">👤</div>
       <div class="user-info">
         <strong id="sidebarName">User</strong>
         <span id="sidebarRole">Role</span>
+        <div class="phc-name" id="sidebarPHC"></div>
       </div>
     </div>
     <div class="nav-section" id="navMenu"></div>
@@ -199,7 +193,7 @@
       <h1 id="pageTitle">Dashboard</h1>
       <div class="topbar-right">
         <div class="time-badge" id="timeBadge">--:--</div>
-        <div class="time-badge" id="phcBadge">PHC</div>
+        <div class="time-badge" id="phcBadge" style="background:#e8f5ee;color:var(--primary);font-weight:600;">PHC</div>
       </div>
     </div>
     <div class="content" id="mainContent">
@@ -209,39 +203,29 @@
 </div>
 
 <div id="printTokenSlip" style="display:none;"></div>
-
 <!-- Consult Modal -->
 <div class="modal-overlay" id="consultModal">
   <div class="modal">
-    <div class="modal-header">
-      <h3>🩺 Patient Consultation</h3>
-      <button class="modal-close" onclick="closeModal('consultModal')">×</button>
-    </div>
+    <div class="modal-header"><h3>🩺 Patient Consultation</h3><button class="modal-close" onclick="closeModal('consultModal')">×</button></div>
     <div class="modal-body" id="consultBody"></div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('consultModal')">Cancel</button>
-      <button class="btn btn-whatsapp" onclick="sendConsultWA()">📱 Save & Send WhatsApp</button>
-      <button class="btn btn-success" onclick="saveTreatment(false)">✓ Save Only</button>
+      <button class="btn btn-whatsapp" onclick="saveTreatment(true)">📱 Save & WhatsApp</button>
+      <button class="btn btn-success" onclick="saveTreatment(false)">✓ Save & Complete</button>
     </div>
   </div>
 </div>
 
 <!-- Token Print Modal -->
 <div class="modal-overlay" id="tokenPrintModal">
-  <div class="modal" style="max-width:420px;">
-    <div class="modal-header">
-      <h3>🖨️ Token Slip Preview</h3>
-      <button class="modal-close" onclick="closeModal('tokenPrintModal')">×</button>
-    </div>
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header"><h3>🖨️ Token Slip</h3><button class="modal-close" onclick="closeModal('tokenPrintModal')">×</button></div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--text-light);margin-bottom:12px;">கீழே உள்ள token slip-ஐ patient-க்கு print பண்ணி கொடுங்கள்.</p>
-      <div class="token-slip-preview">
-        <div class="token-slip-card" id="tokenSlipContent"></div>
-      </div>
+      <div class="token-slip-preview"><div class="token-slip-card" id="tokenSlipContent"></div></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('tokenPrintModal')">Close</button>
-      <button class="btn btn-print" onclick="printTokenSlip()">🖨️ Print Slip</button>
+      <button class="btn btn-print" onclick="printTokenSlip()">🖨️ Print</button>
     </div>
   </div>
 </div>
@@ -249,475 +233,451 @@
 <!-- Pregnancy Modal -->
 <div class="modal-overlay" id="pregModal">
   <div class="modal">
-    <div class="modal-header">
-      <h3>🤰 Register Pregnant Woman</h3>
-      <button class="modal-close" onclick="closeModal('pregModal')">×</button>
-    </div>
+    <div class="modal-header"><h3>🤰 Register Pregnant Woman</h3><button class="modal-close" onclick="closeModal('pregModal')">×</button></div>
     <div class="modal-body">
       <div class="form-grid">
         <div class="form-group"><label>Full Name *</label><input id="pm_name" placeholder="பெயர்"></div>
-        <div class="form-group"><label>Age *</label><input id="pm_age" type="number" placeholder="வயது"></div>
-        <div class="form-group"><label>Mobile (WhatsApp) *</label><input id="pm_mobile" placeholder="கைபேசி எண்"></div>
-        <div class="form-group"><label>Blood Group</label>
-          <select id="pm_blood"><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select>
-        </div>
+        <div class="form-group"><label>Age *</label><input id="pm_age" type="number"></div>
+        <div class="form-group"><label>Mobile *</label><input id="pm_mobile" placeholder="கைபேசி"></div>
+        <div class="form-group"><label>Blood Group</label><select id="pm_blood"><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
         <div class="form-group full"><label>Address</label><input id="pm_address" placeholder="முகவரி"></div>
         <div class="form-group"><label>LMP Date *</label><input id="pm_lmp" type="date"></div>
-        <div class="form-group"><label>High Risk?</label>
-          <select id="pm_risk"><option value="No">No</option><option value="Yes">Yes</option></select>
-        </div>
+        <div class="form-group"><label>High Risk?</label><select id="pm_risk"><option value="No">No</option><option value="Yes">Yes</option></select></div>
       </div>
       <div id="pregAlert" class="alert"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('pregModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="registerPregnancy()">✓ Register & Send WhatsApp</button>
+      <button class="btn btn-primary" onclick="registerPregnancy()">✓ Register</button>
     </div>
   </div>
 </div>
 
-<!-- WhatsApp Modal -->
-<div class="modal-overlay" id="waModal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>📱 Send WhatsApp Message</h3>
-      <button class="modal-close" onclick="closeModal('waModal')">×</button>
-    </div>
+<!-- Add Stock Modal -->
+<div class="modal-overlay" id="stockModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header"><h3>📦 Add Medicine Stock</h3><button class="modal-close" onclick="closeModal('stockModal')">×</button></div>
     <div class="modal-body">
-      <div class="form-group"><label>Mobile Number</label><input id="wa_to" placeholder="91XXXXXXXXXX"></div>
-      <div class="form-group"><label>Message</label><textarea id="wa_msg" rows="5" placeholder="Message..."></textarea></div>
-      <div class="wa-preview">
-        <div class="wa-bubble">
-          <div class="wa-bubble-header">🏥 Virudhunagar PHC</div>
-          <span id="wa_preview_text">Message preview...</span>
-        </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Medicine Name *</label><input id="sm_name" placeholder="Medicine name"></div>
+        <div class="form-group"><label>Category</label><select id="sm_cat"><option>Tablet</option><option>Syrup</option><option>Injection</option><option>Ointment</option><option>Drops</option><option>Capsule</option></select></div>
+        <div class="form-group"><label>Batch Number</label><input id="sm_batch" placeholder="Batch no."></div>
+        <div class="form-group"><label>Quantity *</label><input id="sm_qty" type="number" placeholder="0"></div>
+        <div class="form-group"><label>Minimum Level</label><input id="sm_min" type="number" placeholder="10"></div>
+        <div class="form-group"><label>Expiry Date</label><input id="sm_expiry" type="date"></div>
       </div>
-      <div id="waAlert" class="alert" style="margin-top:12px;"></div>
+      <div id="stockAlert" class="alert"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('waModal')">Cancel</button>
-      <button class="btn btn-whatsapp" onclick="sendWA()">📱 Send WhatsApp</button>
+      <button class="btn btn-outline" onclick="closeModal('stockModal')">Cancel</button>
+      <button class="btn btn-success" onclick="saveStock()">✓ Add Stock</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ -->
-<!-- SUPABASE loaded FIRST, then all app code              -->
-<!-- ═══════════════════════════════════════════════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ── SUPABASE INIT ──
+// ══════════════════════════════════════════
+// SUPABASE INIT
+// ══════════════════════════════════════════
 const SUPABASE_URL = 'https://jzsappmieigtjhxtppku.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6c2FwcG1pZWlndGpoeHRwcGt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NzY4NTYsImV4cCI6MjA5MzQ1Mjg1Nn0.GF8TQA1_SzION4LRF9cYq96DKkKl3yuxcZfu6-eKClE';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let currentUser = null;
-let currentPatient = null;
-let waLogs = [];
-let lastPrintedToken = null;
-let currentLocation = null;
+let currentUser = null, currentPatient = null, waLogs = [], lastPrintedToken = null, currentLocation = null;
 
-const PHC_LOCATIONS = {
-  'Virudhunagar Main PHC':  { lat: 9.5800, lng: 77.9624, radius: 300 },
-  'Aruppukottai PHC':       { lat: 9.5100, lng: 78.0960, radius: 300 },
-  'Sivakasi PHC':           { lat: 9.4510, lng: 77.7990, radius: 300 },
-  'Rajapalayam PHC':        { lat: 9.4520, lng: 77.5570, radius: 300 },
-  'Srivilliputhur PHC':     { lat: 9.5100, lng: 77.6370, radius: 300 },
-  'Sattur PHC':             { lat: 9.3490, lng: 77.9150, radius: 300 },
-  'Thiruchuli PHC':         { lat: 9.3700, lng: 77.9800, radius: 300 },
-  'Kariapatti PHC':         { lat: 9.4500, lng: 77.9200, radius: 300 },
+// ── PHC COORDINATES ──
+const PHC_COORDS = {
+  'Virudhunagar Main PHC':  {lat:9.5800,lng:77.9624,radius:300},
+  'Aruppukottai PHC':       {lat:9.5100,lng:78.0960,radius:300},
+  'Sivakasi PHC':           {lat:9.4510,lng:77.7990,radius:300},
+  'Rajapalayam PHC':        {lat:9.4520,lng:77.5570,radius:300},
+  'Srivilliputhur PHC':     {lat:9.5100,lng:77.6370,radius:300},
+  'Sattur PHC':             {lat:9.3490,lng:77.9150,radius:300},
+  'Thiruchuli PHC':         {lat:9.3700,lng:77.9800,radius:300},
+  'Kariapatti PHC':         {lat:9.4500,lng:77.9200,radius:300},
 };
 
-function getDistanceMetres(lat1, lng1, lat2, lng2) {
-  const R = 6371000;
-  const dLat = (lat2-lat1)*Math.PI/180;
-  const dLng = (lng2-lng1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+const PHC_LIST = Object.keys(PHC_COORDS);
+
+// ── ROLE CONFIG ──
+const ROLE_ICONS = {district_admin:'🏛',phc_admin:'🏥',doctor:'🩺',pharmacist:'💊',staff:'👤',receptionist:'📋',anm:'🤰',ddhs:'🏛'};
+const ROLE_LABELS = {district_admin:'District Admin',phc_admin:'PHC Admin',doctor:'Doctor',pharmacist:'Pharmacist',staff:'Staff',receptionist:'Receptionist',anm:'ANM',ddhs:'DDHS'};
+
+const NAV_CONFIG = {
+  district_admin: [{id:'dashboard',icon:'📊',label:'District Dashboard'},{id:'phc_list',icon:'🏥',label:'All PHCs'},{id:'allpatients',icon:'👥',label:'All Patients'},{id:'allstaff',icon:'👤',label:'All Staff'},{id:'reports',icon:'📈',label:'Reports'},{id:'audit',icon:'📋',label:'Audit Log'}],
+  phc_admin:      [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'register',icon:'📋',label:'Register Patient'},{id:'queue',icon:'🎫',label:'Token Queue'},{id:'medicine',icon:'💊',label:'Medicine Stock'},{id:'attendance',icon:'📅',label:'Attendance'},{id:'reports',icon:'📈',label:'PHC Reports'}],
+  doctor:         [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'docqueue',icon:'🩺',label:'My Queue'},{id:'prescription',icon:'📝',label:'Prescriptions'},{id:'pathistory',icon:'📂',label:'Patient History'},{id:'pregnancy',icon:'🤰',label:'Pregnancy'},{id:'attendance',icon:'📅',label:'Attendance'}],
+  pharmacist:     [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'pharmacy',icon:'💊',label:'Dispense Medicine'},{id:'medicine',icon:'📦',label:'Stock Management'},{id:'stock_txn',icon:'📜',label:'Stock History'},{id:'attendance',icon:'📅',label:'Attendance'}],
+  staff:          [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'register',icon:'📋',label:'Register Patient'},{id:'queue',icon:'🎫',label:'Token Queue'},{id:'medicine',icon:'💊',label:'Medicine Stock'},{id:'whatsapp',icon:'📱',label:'WhatsApp'},{id:'attendance',icon:'📅',label:'Attendance'}],
+  receptionist:   [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'register',icon:'📋',label:'Register Patient'},{id:'queue',icon:'🎫',label:'Token Queue'},{id:'attendance',icon:'📅',label:'Attendance'}],
+  anm:            [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'pregnancy',icon:'🤰',label:'Pregnancy Module'},{id:'vaccination',icon:'💉',label:'Vaccination'},{id:'register',icon:'📋',label:'Register Patient'},{id:'whatsapp',icon:'📱',label:'WhatsApp'},{id:'attendance',icon:'📅',label:'Attendance'}],
+  ddhs:           [{id:'dashboard',icon:'📊',label:'District Dashboard'},{id:'phc_list',icon:'🏥',label:'All PHCs'},{id:'allpatients',icon:'👥',label:'All Patients'},{id:'pregnancy',icon:'🤰',label:'Pregnancy'},{id:'vaccination',icon:'💉',label:'Vaccination'},{id:'medicine',icon:'💊',label:'Medicine'},{id:'whatsapp',icon:'📱',label:'WhatsApp'},{id:'attendance',icon:'📅',label:'Attendance'},{id:'reports',icon:'📈',label:'Reports'}],
+};
+
+// ── HELPERS ──
+function gpsDistance(lat1,lng1,lat2,lng2){const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180,a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+function getGPS(){return new Promise(r=>{if(!navigator.geolocation){r(null);return;}navigator.geolocation.getCurrentPosition(p=>r({lat:p.coords.latitude,lng:p.coords.longitude,accuracy:Math.round(p.coords.accuracy)}),()=>r(null),{timeout:8000,maximumAge:0,enableHighAccuracy:true});});}
+function updateTime(){const el=document.getElementById('timeBadge');if(el)el.textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});}
+setInterval(updateTime,1000);updateTime();
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function showAlert(id,type,msg){const el=document.getElementById(id);if(!el)return;el.className=`alert alert-${type}`;el.textContent=msg;el.style.display='block';}
+function fmtTime(ts){if(!ts)return'-';return new Date(ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});}
+function fmtDate(d){if(!d)return'-';return new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}
+
+// ── AUDIT LOG ──
+async function auditLog(action, table, recordId, details){
+  try{await db.from('audit_log').insert({action,table_name:table,record_id:String(recordId||''),done_by:currentUser?.name||'',role:currentUser?.role||'',phc:currentUser?.phc||'',details:details||''});}catch(e){}
 }
 
-function getGPS() {
-  return new Promise(resolve => {
-    if (!navigator.geolocation) { resolve(null); return; }
-    navigator.geolocation.getCurrentPosition(
-      pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) }),
-      () => resolve(null),
-      { timeout: 8000, maximumAge: 0, enableHighAccuracy: true }
-    );
+// ══════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════
+async function handleLogin(){
+  const btn=document.getElementById('loginBtn');
+  const errEl=document.getElementById('loginError');
+  errEl.style.display='none';
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPassword').value.trim();
+  if(!email||!pass){errEl.textContent='Email and password required!';errEl.style.display='block';return;}
+  btn.textContent='⏳ Logging in...';btn.disabled=true;
+  try{
+    const {data,error}=await db.from('users').select('*').eq('email',email).eq('password',pass).single();
+    if(error||!data){
+      // Patient login via pregnancy
+      const {data:pd}=await db.from('pregnancy').select('*').eq('mobile',email).eq('unique_id',pass).limit(1);
+      if(pd&&pd.length>0){const p=pd[0];currentUser={name:p.name,role:'patient',phc:p.phc,mobile:email,id:p.id};showApp();navigateTo('myhistory');return;}
+      errEl.textContent='❌ Invalid email or password!';errEl.style.display='block';return;
+    }
+    // GPS for non-district roles
+    let distanceFromPHC=null,locationStatus='location_off',gpsNote='';
+    if(data.role!=='district_admin'&&data.role!=='ddhs'){
+      btn.textContent='📍 Getting location...';
+      const gps=await getGPS();
+      if(gps){
+        currentLocation=gps;
+        const phcC=PHC_COORDS[data.phc];
+        if(phcC){
+          distanceFromPHC=Math.round(gpsDistance(gps.lat,gps.lng,phcC.lat,phcC.lng));
+          locationStatus=distanceFromPHC<=phcC.radius?'within_phc':'outside_phc';
+          gpsNote=`${distanceFromPHC}m from PHC`;
+          if(locationStatus==='outside_phc'){
+            const ok=confirm(`⚠️ You are ${distanceFromPHC}m away from ${data.phc}.\nAllowed: ${phcC.radius}m\n\nAttendance marked as "Outside PHC". Proceed?`);
+            if(!ok){btn.textContent='🔐 Login to System';btn.disabled=false;return;}
+          }
+        }else{locationStatus='phc_unknown';gpsNote=`GPS:${gps.lat.toFixed(4)},${gps.lng.toFixed(4)}`;}
+      }
+    }
+    currentUser=data;
+    if(data.role!=='district_admin'&&data.role!=='ddhs'){
+      await db.from('attendance').insert({user_name:data.name,role:data.role,phc:data.phc,check_in:new Date().toTimeString().slice(0,5),status:(locationStatus==='within_phc'||locationStatus==='location_off')?'present':'outside_phc',latitude:currentLocation?.lat||null,longitude:currentLocation?.lng||null,distance_from_phc:distanceFromPHC,location_note:gpsNote||null});
+    }
+    await auditLog('LOGIN','users',data.id,`${data.role} logged in from ${data.phc}`);
+    showApp();navigateTo('dashboard');
+  }catch(err){errEl.textContent='❌ Error: '+err.message;errEl.style.display='block';}
+  finally{btn.textContent='🔐 Login to System';btn.disabled=false;}
+}
+
+function showApp(){document.getElementById('loginPage').style.display='none';document.getElementById('app').style.display='block';setupSidebar();}
+function logout(){currentUser=null;document.getElementById('app').style.display='none';document.getElementById('loginPage').style.display='flex';}
+
+function setupSidebar(){
+  const role=currentUser.role;
+  document.getElementById('sidebarAvatar').textContent=ROLE_ICONS[role]||'👤';
+  document.getElementById('sidebarName').textContent=currentUser.name;
+  document.getElementById('sidebarRole').textContent=ROLE_LABELS[role]||role;
+  document.getElementById('sidebarPHC').textContent=currentUser.phc||'';
+  document.getElementById('phcBadge').textContent=currentUser.phc?.split(' ')[0]||'District';
+  const nav=document.getElementById('navMenu');
+  nav.innerHTML='<div class="nav-label">Navigation</div>';
+  (NAV_CONFIG[role]||NAV_CONFIG.staff).forEach(item=>{
+    nav.innerHTML+=`<div class="nav-item" id="nav-${item.id}" onclick="navigateTo('${item.id}')"><span class="icon">${item.icon}</span>${item.label}</div>`;
   });
 }
 
-function updateTime() {
-  const el = document.getElementById('timeBadge');
-  if (el) el.textContent = new Date().toLocaleTimeString('ta-IN',{hour:'2-digit',minute:'2-digit'});
+function navigateTo(page){
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const nEl=document.getElementById('nav-'+page);if(nEl)nEl.classList.add('active');
+  const titles={dashboard:'Dashboard',register:'Register Patient',queue:'Token Queue',docqueue:'Doctor Queue',prescription:'Prescriptions',pathistory:'Patient History',pregnancy:'Pregnancy Module',vaccination:'Vaccination',medicine:'Medicine Stock',pharmacy:'Dispense Medicine',whatsapp:'WhatsApp Center',attendance:'Attendance',phc_list:'All PHCs',allpatients:'All Patients',allstaff:'All Staff',reports:'Reports',audit:'Audit Log',stock_txn:'Stock History',myhistory:'My History',myprescriptions:'My Prescriptions',myvaccination:'Vaccination Schedule'};
+  document.getElementById('pageTitle').textContent=titles[page]||page;
+  const pages={dashboard:loadDashboard,register:loadRegister,queue:loadQueue,docqueue:loadDocQueue,prescription:loadPrescription,pathistory:loadPatHistory,pregnancy:loadPregnancy,vaccination:loadVaccination,medicine:loadMedicine,pharmacy:loadPharmacy,whatsapp:loadWhatsApp,attendance:loadAttendance,phc_list:loadAllPHCs,allpatients:loadAllPatients,allstaff:loadAllStaff,reports:loadReports,audit:loadAudit,stock_txn:loadStockTxn,myhistory:loadMyHistory,myprescriptions:loadMyPrescriptions,myvaccination:loadMyVaccination};
+  if(pages[page])pages[page]();
 }
-setInterval(updateTime, 1000); updateTime();
 
-// ── KEY FIX: handleLogin is the ONLY function called from button ──
-async function handleLogin() {
-  const btn = document.getElementById('loginBtn');
-  const errEl = document.getElementById('loginError');
-  errEl.style.display = 'none';
+// ══════════════════════════════════════════
+// WHATSAPP
+// ══════════════════════════════════════════
+async function sendWhatsApp(to,message){
+  try{
+    const res=await fetch('/.netlify/functions/whatsapp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to,message})});
+    const data=await res.json();
+    waLogs.unshift({to,message,time:new Date().toLocaleTimeString(),status:data.success?'sent':'failed'});
+    return data.success;
+  }catch(e){waLogs.unshift({to,message,time:new Date().toLocaleTimeString(),status:'failed'});return false;}
+}
 
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass  = document.getElementById('loginPassword').value.trim();
+// ══════════════════════════════════════════
+// TOKEN SLIP
+// ══════════════════════════════════════════
+function buildSlipHTML(p,token){
+  const now=new Date();
+  return`<div class="slip-header"><div class="slip-emblem">🏥</div><div><div class="slip-title">Virudhunagar District PHC</div><div class="slip-subtitle">விருதுநகர் மாவட்ட PHC</div></div></div>
+  <div style="text-align:center;padding:10px 0;"><div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:2px;margin-bottom:3px;">TOKEN NUMBER</div><div class="slip-token-num">T-${String(token).padStart(3,'0')}</div><div style="font-size:10px;color:var(--text-light);">உங்கள் token number</div></div>
+  <div class="slip-details">
+    <div class="slip-detail-item"><div class="slip-detail-label">Patient</div><div class="slip-detail-value">${p.name}</div></div>
+    <div class="slip-detail-item"><div class="slip-detail-label">Age/Gender</div><div class="slip-detail-value">${p.age}y/${p.gender||'-'}</div></div>
+    <div class="slip-detail-item"><div class="slip-detail-label">Date</div><div class="slip-detail-value">${now.toLocaleDateString('en-IN',{day:'2-digit',month:'short'})}</div></div>
+    <div class="slip-detail-item"><div class="slip-detail-label">Time</div><div class="slip-detail-value">${now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</div></div>
+    <div class="slip-detail-item" style="grid-column:1/-1;"><div class="slip-detail-label">Complaint</div><div class="slip-detail-value">${p.disease||'General Checkup'}</div></div>
+  </div>
+  <div class="slip-footer"><div style="font-size:11px;color:var(--primary);font-weight:700;">${p.phc||currentUser?.phc}</div><div>உங்கள் token call ஆகும்வரை காத்திருங்கள்</div></div>`;
+}
 
-  if (!email || !pass) {
-    errEl.textContent = 'Email மற்றும் Password தேவை!';
-    errEl.style.display = 'block';
+function showTokenPrint(p,token){lastPrintedToken={p,token};document.getElementById('tokenSlipContent').innerHTML=buildSlipHTML(p,token);document.getElementById('tokenPrintModal').classList.add('open');}
+
+function printTokenSlip(){
+  if(!lastPrintedToken)return;
+  const {p,token}=lastPrintedToken;
+  const pd=document.getElementById('printTokenSlip');
+  pd.style.display='block';
+  pd.innerHTML=`<style>body{font-family:sans-serif;}div{font-family:sans-serif;}</style>
+  <div style="border-top:4px solid #1a6b3c;padding:10px;max-width:78mm;">
+    <div style="display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px dashed #ccc;margin-bottom:8px;">
+      <div style="width:30px;height:30px;background:#1a6b3c;border-radius:50%;text-align:center;line-height:30px;">🏥</div>
+      <div><div style="font-size:10px;font-weight:700;color:#1a6b3c;">Virudhunagar District PHC</div><div style="font-size:8px;color:#666;">விருதுநகர் மாவட்ட PHC</div></div>
+    </div>
+    <div style="text-align:center;padding:8px 0;">
+      <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:2px;">TOKEN</div>
+      <div style="font-size:40px;font-weight:700;color:#1a6b3c;">T-${String(token).padStart(3,'0')}</div>
+    </div>
+    <div style="margin:8px 0;">
+      <div style="padding:4px 6px;background:#f5f5f5;border-radius:3px;margin-bottom:4px;"><span style="font-size:8px;color:#888;">NAME: </span><span style="font-size:11px;font-weight:600;">${p.name}</span></div>
+      <div style="padding:4px 6px;background:#f5f5f5;border-radius:3px;margin-bottom:4px;"><span style="font-size:8px;color:#888;">AGE/GENDER: </span><span style="font-size:11px;font-weight:600;">${p.age}y / ${p.gender||'-'}</span></div>
+      <div style="padding:4px 6px;background:#f5f5f5;border-radius:3px;margin-bottom:4px;"><span style="font-size:8px;color:#888;">COMPLAINT: </span><span style="font-size:11px;font-weight:600;">${p.disease||'General'}</span></div>
+      <div style="padding:4px 6px;background:#f5f5f5;border-radius:3px;"><span style="font-size:8px;color:#888;">DATE/TIME: </span><span style="font-size:11px;font-weight:600;">${new Date().toLocaleString('en-IN')}</span></div>
+    </div>
+    <div style="text-align:center;font-size:9px;color:#888;padding-top:8px;border-top:1px dashed #ccc;">
+      <div style="color:#1a6b3c;font-weight:700;">${p.phc||currentUser?.phc}</div>
+      <div>Token call ஆகும்வரை காத்திருங்கள்</div>
+    </div>
+  </div>`;
+  window.print();
+  setTimeout(()=>{pd.style.display='none';},1000);
+}
+// ══════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════
+async function loadDashboard(){
+  const c=document.getElementById('mainContent');
+  c.innerHTML='<div class="loading"><div class="spinner"></div>Loading dashboard...</div>';
+  const isDistrict=['district_admin','ddhs'].includes(currentUser.role);
+  const today=new Date().toISOString().slice(0,10);
+
+  if(isDistrict){
+    const results=await Promise.all(PHC_LIST.map(async phc=>{
+      const [{count:pat},{count:preg}]=await Promise.all([
+        db.from('patients').select('id',{count:'exact'}).eq('phc',phc),
+        db.from('pregnancy').select('id',{count:'exact'}).eq('phc',phc),
+      ]);
+      return{phc,pat:pat||0,preg:preg||0};
+    }));
+    const totalPat=results.reduce((s,r)=>s+r.pat,0);
+    const totalPreg=results.reduce((s,r)=>s+r.preg,0);
+    c.innerHTML=`
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon blue">🏥</div><div class="stat-info"><div class="value">${PHC_LIST.length}</div><div class="label">Total PHCs</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">👥</div><div class="stat-info"><div class="value">${totalPat}</div><div class="label">Total Patients</div></div></div>
+      <div class="stat-card"><div class="stat-icon purple">🤰</div><div class="stat-info"><div class="value">${totalPreg}</div><div class="label">Pregnancy Cases</div></div></div>
+    </div>
+    <div class="section-card">
+      <div class="section-header"><h3>🏥 PHC-wise Summary</h3></div>
+      <div class="section-body">
+        <table><tr><th>PHC Name</th><th>Patients</th><th>Pregnancy</th><th>Status</th></tr>
+        ${results.map(r=>`<tr><td><strong>${r.phc}</strong></td><td>${r.pat}</td><td>${r.preg}</td><td><span class="badge badge-active">Active</span></td></tr>`).join('')}
+        </table>
+      </div>
+    </div>`;
     return;
   }
 
-  btn.textContent = '⏳ Logging in...';
-  btn.disabled = true;
-
-  try {
-    // Try staff/doctor login
-    const { data, error } = await db.from('users').select('*').eq('email', email).eq('password', pass).single();
-
-    if (error || !data) {
-      // Try pregnancy patient login
-      const { data: pregData } = await db.from('pregnancy').select('*').eq('mobile', email).eq('unique_id', pass).limit(1);
-      if (pregData && pregData.length > 0) {
-        const p = pregData[0];
-        currentUser = { name: p.name, role: 'patient', phc: p.phc, mobile: email, id: p.id };
-        showApp();
-        navigateTo('myhistory');
-        return;
-      }
-      errEl.textContent = '❌ Email அல்லது Password தவறாக உள்ளது. மீண்டும் try பண்ணுங்கள்.';
-      errEl.style.display = 'block';
-      return;
-    }
-
-    // GPS check
-    btn.textContent = '📍 Getting location...';
-    const gps = await getGPS();
-
-    let distanceFromPHC = null;
-    let locationStatus = 'location_off';
-    let gpsNote = '';
-
-    if (gps) {
-      currentLocation = gps;
-      const phcCoords = PHC_LOCATIONS[data.phc];
-      if (phcCoords) {
-        distanceFromPHC = Math.round(getDistanceMetres(gps.lat, gps.lng, phcCoords.lat, phcCoords.lng));
-        const withinPHC = distanceFromPHC <= phcCoords.radius;
-        locationStatus = withinPHC ? 'within_phc' : 'outside_phc';
-        gpsNote = `${distanceFromPHC}m from PHC`;
-        if (data.role !== 'ddhs' && !withinPHC) {
-          const proceed = confirm(`⚠️ Location Alert!\n\nYou are ${distanceFromPHC}m away from ${data.phc}.\nAllowed: ${phcCoords.radius}m\n\nAttendance will be marked as "Outside PHC".\n\nProceed?`);
-          if (!proceed) { btn.textContent = '🔐 Login to System'; btn.disabled = false; return; }
-        }
-      } else {
-        locationStatus = 'phc_unknown';
-        gpsNote = `GPS: ${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}`;
-      }
-    }
-
-    currentUser = data;
-
-    // Save attendance
-    await db.from('attendance').insert({
-      user_name: data.name, role: data.role, phc: data.phc,
-      check_in: new Date().toTimeString().slice(0,5),
-      status: (locationStatus === 'within_phc' || locationStatus === 'location_off' || data.role === 'ddhs') ? 'present' : 'outside_phc',
-      latitude: gps ? gps.lat : null,
-      longitude: gps ? gps.lng : null,
-      distance_from_phc: distanceFromPHC,
-      location_note: gpsNote || (gps ? null : 'GPS unavailable')
-    });
-
-    showApp();
-    navigateTo('dashboard');
-
-  } catch (err) {
-    errEl.textContent = '❌ Error: ' + err.message;
-    errEl.style.display = 'block';
-  } finally {
-    btn.textContent = '🔐 Login to System';
-    btn.disabled = false;
-  }
-}
-
-function showApp() {
-  document.getElementById('loginPage').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  setupSidebar();
-}
-
-function logout() {
-  currentUser = null;
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('loginPage').style.display = 'flex';
-}
-
-// ── WHATSAPP ──
-async function sendWhatsApp(to, message) {
-  try {
-    const res = await fetch('/.netlify/functions/whatsapp', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ to, message })
-    });
-    const data = await res.json();
-    waLogs.unshift({ to, message, time: new Date().toLocaleTimeString(), status: data.success ? 'sent' : 'failed', error: data.error });
-    return data.success;
-  } catch(e) {
-    waLogs.unshift({ to, message, time: new Date().toLocaleTimeString(), status:'failed', error: e.message });
-    return false;
-  }
-}
-
-// ── TOKEN SLIP ──
-function buildTokenSlipHTML(patient, token) {
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-  const timeStr = now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-  return `
-    <div class="slip-header">
-      <div class="slip-emblem">🏥</div>
-      <div><div class="slip-title">Virudhunagar PHC<br>Management System</div>
-      <div class="slip-subtitle">விருதுநகர் மாவட்ட முதன்மை சுகாதார மையம்</div></div>
-    </div>
-    <div class="slip-token-big">
-      <div style="font-size:11px;color:var(--text-light);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;">TOKEN NUMBER</div>
-      <div class="slip-token-num">T-${String(token).padStart(3,'0')}</div>
-      <div class="slip-token-label">உங்கள் token number</div>
-    </div>
-    <div class="slip-details">
-      <div class="slip-detail-item"><div class="slip-detail-label">Patient Name</div><div class="slip-detail-value">${patient.name}</div></div>
-      <div class="slip-detail-item"><div class="slip-detail-label">Age / Gender</div><div class="slip-detail-value">${patient.age} yrs / ${patient.gender||'-'}</div></div>
-      <div class="slip-detail-item"><div class="slip-detail-label">Doctor</div><div class="slip-detail-value" style="font-size:11px;">${patient.doctor||'Duty Doctor'}</div></div>
-      <div class="slip-detail-item"><div class="slip-detail-label">Date & Time</div><div class="slip-detail-value" style="font-size:11px;">${dateStr}, ${timeStr}</div></div>
-      <div class="slip-detail-item" style="grid-column:1/-1;"><div class="slip-detail-label">Symptoms</div><div class="slip-detail-value">${patient.disease||'General Checkup'}</div></div>
-    </div>
-    <div class="slip-footer">
-      <div style="font-size:12px;color:var(--primary);font-weight:600;margin-bottom:4px;">${patient.phc||currentUser?.phc||'Virudhunagar PHC'}</div>
-      <div>உங்கள் token call ஆகும்வரை காத்திருங்கள்</div>
-      <div style="margin-top:4px;font-size:10px;">Please wait until your token number is called</div>
-    </div>`;
-}
-
-function showTokenPrint(patient, token) {
-  lastPrintedToken = { patient, token };
-  document.getElementById('tokenSlipContent').innerHTML = buildTokenSlipHTML(patient, token);
-  document.getElementById('tokenPrintModal').classList.add('open');
-}
-
-function printTokenSlip() {
-  if (!lastPrintedToken) return;
-  const { patient, token } = lastPrintedToken;
-  const printDiv = document.getElementById('printTokenSlip');
-  printDiv.style.display = 'block';
-  printDiv.innerHTML = `<style>
-    body{font-family:sans-serif;}
-    .sh{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px dashed #ccc;margin-bottom:10px;}
-    .se{width:36px;height:36px;background:#1a6b3c;border-radius:50%;text-align:center;line-height:36px;font-size:18px;}
-    </style>
-    <div style="border-top:4px solid #1a6b3c;padding:12px;">
-      <div class="sh"><div class="se">🏥</div>
-        <div><div style="font-size:11px;font-weight:700;color:#1a6b3c;">Virudhunagar PHC Management System</div>
-        <div style="font-size:9px;color:#666;">விருதுநகர் மாவட்ட முதன்மை சுகாதார மையம்</div></div></div>
-      <div style="text-align:center;padding:10px 0;">
-        <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;">TOKEN NUMBER</div>
-        <div style="font-size:44px;font-weight:700;color:#1a6b3c;">T-${String(token).padStart(3,'0')}</div>
-      </div>
-      <div style="margin:10px 0;">
-        <div style="margin-bottom:6px;padding:5px 8px;background:#f5f5f5;border-radius:4px;"><div style="font-size:9px;color:#888;">PATIENT NAME</div><div style="font-size:12px;font-weight:600;">${patient.name}</div></div>
-        <div style="margin-bottom:6px;padding:5px 8px;background:#f5f5f5;border-radius:4px;"><div style="font-size:9px;color:#888;">AGE / GENDER</div><div style="font-size:12px;font-weight:600;">${patient.age} yrs / ${patient.gender||'-'}</div></div>
-        <div style="margin-bottom:6px;padding:5px 8px;background:#f5f5f5;border-radius:4px;"><div style="font-size:9px;color:#888;">COMPLAINT</div><div style="font-size:12px;font-weight:600;">${patient.disease||'General Checkup'}</div></div>
-        <div style="margin-bottom:6px;padding:5px 8px;background:#f5f5f5;border-radius:4px;"><div style="font-size:9px;color:#888;">DATE & TIME</div><div style="font-size:12px;font-weight:600;">${new Date().toLocaleString('en-IN')}</div></div>
-      </div>
-      <div style="text-align:center;font-size:10px;color:#888;padding-top:10px;border-top:1px dashed #ccc;">
-        <div style="font-size:11px;color:#1a6b3c;font-weight:700;">${patient.phc||'Virudhunagar PHC'}</div>
-        <div>உங்கள் token call ஆகும்வரை காத்திருங்கள்</div>
-      </div>
-    </div>`;
-  window.print();
-  setTimeout(() => { printDiv.style.display = 'none'; }, 1000);
-}
-
-// ── SIDEBAR ──
-const navConfig = {
-  staff:      [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'register',icon:'📋',label:'Register Patient'},{id:'queue',icon:'🎫',label:'Token Queue'},{id:'medicine',icon:'💊',label:'Medicine Stock'},{id:'whatsapp',icon:'📱',label:'WhatsApp Alerts'},{id:'attendance',icon:'📅',label:'Attendance'}],
-  doctor:     [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'docqueue',icon:'🩺',label:'My Queue'},{id:'prescription',icon:'📝',label:'Prescriptions'},{id:'pregnancy',icon:'🤰',label:'Pregnancy Cases'},{id:'pathistory',icon:'📂',label:'Patient History'},{id:'whatsapp',icon:'📱',label:'WhatsApp Alerts'},{id:'attendance',icon:'📅',label:'Attendance'}],
-  anm:        [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'pregnancy',icon:'🤰',label:'Pregnancy Module'},{id:'vaccination',icon:'💉',label:'Vaccination Schedule'},{id:'register',icon:'📋',label:'Register Patient'},{id:'whatsapp',icon:'📱',label:'WhatsApp Alerts'},{id:'attendance',icon:'📅',label:'Attendance'}],
-  pharmacist: [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'pharmacy',icon:'💊',label:'Dispense Medicine'},{id:'medicine',icon:'📦',label:'Stock Management'},{id:'attendance',icon:'📅',label:'Attendance'}],
-  ddhs:       [{id:'dashboard',icon:'📊',label:'District Dashboard'},{id:'allphcs',icon:'🏥',label:'All PHCs'},{id:'allpatients',icon:'👥',label:'All Patients'},{id:'pregnancy',icon:'🤰',label:'Pregnancy Overview'},{id:'vaccination',icon:'💉',label:'Vaccination'},{id:'medicine',icon:'💊',label:'Medicine Stock'},{id:'whatsapp',icon:'📱',label:'WhatsApp Center'},{id:'attendance',icon:'📅',label:'Staff Attendance'}],
-  patient:    [{id:'myhistory',icon:'📋',label:'My Medical History'},{id:'myprescriptions',icon:'📝',label:'My Prescriptions'},{id:'myvaccination',icon:'💉',label:'Vaccination Schedule'}]
-};
-
-function setupSidebar() {
-  const role = currentUser.role;
-  document.getElementById('sidebarAvatar').textContent = role==='doctor'?'🩺':role==='anm'?'🤰':role==='ddhs'?'🏛':role==='pharmacist'?'💊':role==='patient'?'🧑':'👤';
-  document.getElementById('sidebarName').textContent = currentUser.name;
-  document.getElementById('sidebarRole').textContent = role.toUpperCase();
-  document.getElementById('phcBadge').textContent = currentUser.phc?.split(' ')[0]||'PHC';
-  const nav = document.getElementById('navMenu');
-  nav.innerHTML = '<div class="nav-label">Navigation</div>';
-  (navConfig[role]||navConfig.staff).forEach(item => {
-    nav.innerHTML += `<div class="nav-item" id="nav-${item.id}" onclick="navigateTo('${item.id}')"><span class="icon">${item.icon}</span>${item.label}</div>`;
-  });
-}
-
-function navigateTo(page) {
-  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
-  const navEl = document.getElementById('nav-'+page);
-  if (navEl) navEl.classList.add('active');
-  const titles={dashboard:'Dashboard',register:'Register Patient',queue:'Token Queue',docqueue:'Doctor Queue',prescription:'Prescriptions',pathistory:'Patient History',pregnancy:'Pregnancy Module',vaccination:'Vaccination Schedule',medicine:'Medicine Stock',pharmacy:'Dispense Medicine',whatsapp:'WhatsApp Center',attendance:'Attendance',allphcs:'All PHCs',allpatients:'All Patients',myhistory:'My Medical History',myprescriptions:'My Prescriptions',myvaccination:'My Vaccinations'};
-  document.getElementById('pageTitle').textContent = titles[page]||page;
-  const pages={dashboard:loadDashboard,register:loadRegister,queue:loadQueue,docqueue:loadDocQueue,prescription:loadPrescription,pathistory:loadPatHistory,pregnancy:loadPregnancy,vaccination:loadVaccination,medicine:loadMedicine,pharmacy:loadPharmacy,whatsapp:loadWhatsApp,attendance:loadAttendance,allphcs:loadAllPHCs,allpatients:loadAllPatients,myhistory:loadMyHistory,myprescriptions:loadMyPrescriptions,myvaccination:loadMyVaccination};
-  if (pages[page]) pages[page]();
-}
-
-// ── DASHBOARD ──
-async function loadDashboard() {
-  const c = document.getElementById('mainContent');
-  c.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
-  const today = new Date().toISOString().slice(0,10);
-  const [patients,preg,att,med] = await Promise.all([
+  const [patients,preg,att,med,rx]=await Promise.all([
     db.from('patients').select('id,status',{count:'exact'}).eq('phc',currentUser.phc),
     db.from('pregnancy').select('id',{count:'exact'}).eq('phc',currentUser.phc),
     db.from('attendance').select('id',{count:'exact'}).eq('phc',currentUser.phc).eq('date',today),
     db.from('medicine').select('id,stock,min_level').eq('phc',currentUser.phc),
+    db.from('prescriptions').select('id',{count:'exact'}).eq('phc',currentUser.phc).eq('dispensed',false),
   ]);
-  const totalPat=patients.count||0;
   const waiting=(patients.data||[]).filter(p=>p.status==='waiting').length;
-  const totalPreg=preg.count||0;
-  const presentStaff=att.count||0;
   const lowMed=(med.data||[]).filter(m=>m.stock<m.min_level).length;
-  const waSent=waLogs.filter(w=>w.status==='sent').length;
+  const {data:compPat}=await db.from('patients').select('waiting_minutes').eq('phc',currentUser.phc).not('waiting_minutes','is',null).limit(50);
+  const avgWait=compPat&&compPat.length>0?Math.round(compPat.reduce((s,p)=>s+(p.waiting_minutes||0),0)/compPat.length):0;
+
   c.innerHTML=`
   <div class="stats-grid">
-    <div class="stat-card"><div class="stat-icon green">👥</div><div class="stat-info"><div class="value">${totalPat}</div><div class="label">Today's Patients</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">👥</div><div class="stat-info"><div class="value">${patients.count||0}</div><div class="label">Today's Patients</div></div></div>
     <div class="stat-card"><div class="stat-icon orange">⏳</div><div class="stat-info"><div class="value">${waiting}</div><div class="label">Waiting</div></div></div>
-    <div class="stat-card"><div class="stat-icon purple">🤰</div><div class="stat-info"><div class="value">${totalPreg}</div><div class="label">Pregnancy Cases</div></div></div>
-    <div class="stat-card"><div class="stat-icon blue">👤</div><div class="stat-info"><div class="value">${presentStaff}</div><div class="label">Staff Present</div></div></div>
+    <div class="stat-card"><div class="stat-icon purple">🤰</div><div class="stat-info"><div class="value">${preg.count||0}</div><div class="label">Pregnancy Cases</div></div></div>
+    <div class="stat-card"><div class="stat-icon blue">👤</div><div class="stat-info"><div class="value">${att.count||0}</div><div class="label">Staff Present</div></div></div>
     <div class="stat-card"><div class="stat-icon red">💊</div><div class="stat-info"><div class="value">${lowMed}</div><div class="label">Low Stock</div></div></div>
-    <div class="stat-card"><div class="stat-icon teal">📱</div><div class="stat-info"><div class="value">${waSent}</div><div class="label">WA Sent Today</div></div></div>
+    <div class="stat-card"><div class="stat-icon indigo">📝</div><div class="stat-info"><div class="value">${rx.count||0}</div><div class="label">Pending Rx</div></div></div>
+    <div class="stat-card"><div class="stat-icon teal">⏱️</div><div class="stat-info"><div class="value">${avgWait}m</div><div class="label">Avg Wait Time</div></div></div>
   </div>
   <div class="section-card">
-    <div class="section-header"><h3>📋 Recent Patients</h3></div>
-    <div id="recentPatients" class="section-body"><div class="loading"><div class="spinner"></div></div></div>
+    <div class="section-header"><h3>📋 Recent Patients</h3><button class="btn btn-outline btn-sm" onclick="loadDashboard()">🔄</button></div>
+    <div id="recentPat" class="section-body"><div class="loading"><div class="spinner"></div></div></div>
   </div>`;
-  const {data:recents} = await db.from('patients').select('*').eq('phc',currentUser.phc).order('created_at',{ascending:false}).limit(5);
-  const rp = document.getElementById('recentPatients');
-  if (!recents||recents.length===0) { rp.innerHTML='<p style="color:var(--text-light);font-size:13px;">No patients today yet.</p>'; return; }
-  rp.innerHTML=`<table><tr><th>Token</th><th>Name</th><th>Age</th><th>Disease</th><th>Status</th><th>Print</th></tr>
-  ${recents.map(p=>`<tr>
+  const {data:rec}=await db.from('patients').select('*').eq('phc',currentUser.phc).order('created_at',{ascending:false}).limit(8);
+  const rp=document.getElementById('recentPat');
+  if(!rec||rec.length===0){rp.innerHTML='<p style="color:var(--text-light);font-size:13px;">No patients today.</p>';return;}
+  rp.innerHTML=`<table><tr><th>Token</th><th>Name</th><th>Age</th><th>Disease</th><th>Reg Time</th><th>Wait</th><th>Status</th><th>Print</th></tr>
+  ${rec.map(p=>`<tr>
     <td><strong>T-${String(p.token_number).padStart(3,'0')}</strong></td>
     <td>${p.name}</td><td>${p.age}</td><td>${p.disease||'-'}</td>
+    <td style="font-size:11px;">${p.registration_time||fmtTime(p.created_at)}</td>
+    <td style="font-size:11px;">${p.waiting_minutes!=null?p.waiting_minutes+'m':'-'}</td>
     <td><span class="badge badge-${p.status}">${p.status}</span></td>
     <td><button class="btn btn-print btn-sm" onclick='showTokenPrint(${JSON.stringify(p).replace(/'/g,"&#39;")},${p.token_number})'>🖨️</button></td>
   </tr>`).join('')}</table>`;
 }
 
-// ── REGISTER PATIENT ──
-async function loadRegister() {
-  const c = document.getElementById('mainContent');
-  const {count} = await db.from('patients').select('id',{count:'exact'}).eq('phc',currentUser.phc);
-  const nextToken = (count||0)+1;
+// ══════════════════════════════════════════
+// REGISTER PATIENT
+// ══════════════════════════════════════════
+const DISEASE_FORMS={
+  Fever:[{id:'fever_days',label:'Fever since (days)',type:'number'},{id:'fever_temp',label:'Temp (°F)',type:'number'},{id:'chills',label:'Chills',type:'select',opts:['Yes','No']},{id:'bodyache',label:'Body ache',type:'select',opts:['Yes','No']}],
+  Diabetes:[{id:'sugar_fasting',label:'Fasting Sugar',type:'number'},{id:'sugar_pp',label:'PP Sugar',type:'number'},{id:'insulin',label:'On Insulin?',type:'select',opts:['Yes','No']}],
+  Hypertension:[{id:'bp_sys',label:'BP Systolic',type:'number'},{id:'bp_dia',label:'BP Diastolic',type:'number'},{id:'bp_meds',label:'On Meds?',type:'select',opts:['Yes','No']}],
+  'Cough & Cold':[{id:'cough_days',label:'Since (days)',type:'number'},{id:'cough_type',label:'Type',type:'select',opts:['Dry','Wet','Blood']},{id:'breathless',label:'Breathless?',type:'select',opts:['No','Mild','Severe']}],
+  Diarrhea:[{id:'motions',label:'Motions/day',type:'number'},{id:'blood_stool',label:'Blood?',type:'select',opts:['Yes','No']},{id:'vomit',label:'Vomiting?',type:'select',opts:['Yes','No']}],
+  Anemia:[{id:'hb',label:'Hb (g/dL)',type:'number'},{id:'pallor',label:'Pallor?',type:'select',opts:['Yes','No']},{id:'fatigue',label:'Fatigue',type:'select',opts:['Mild','Moderate','Severe']}],
+};
+
+function updateDiseaseForm(d){
+  const f=DISEASE_FORMS[d];const el=document.getElementById('diseaseExtraFields');
+  if(!f||!el){if(el)el.innerHTML='';return;}
+  el.innerHTML=`<div style="background:#f0f8f4;border-radius:8px;padding:12px;margin-top:6px;"><div style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:8px;">📋 ${d} Details</div><div class="form-grid">${f.map(x=>`<div class="form-group"><label>${x.label}</label>${x.type==='select'?`<select id="dx_${x.id}">${x.opts.map(o=>`<option>${o}</option>`).join('')}</select>`:`<input id="dx_${x.id}" type="${x.type}" placeholder="${x.label}">`}</div>`).join('')}</div></div>`;
+}
+
+function collectExtras(d){const f=DISEASE_FORMS[d];if(!f)return{};const r={};f.forEach(x=>{const el=document.getElementById('dx_'+x.id);if(el)r[x.id]=el.value;});return r;}
+
+async function loadRegister(){
+  const c=document.getElementById('mainContent');
+  const {count}=await db.from('patients').select('id',{count:'exact'}).eq('phc',currentUser.phc);
+  const nextToken=(count||0)+1;
+  const now=new Date();
   c.innerHTML=`
-  <div class="stats-grid" style="max-width:300px;">
+  <div class="stats-grid" style="max-width:360px;">
     <div class="stat-card"><div class="stat-icon orange">🎫</div><div class="stat-info"><div class="value">T-${String(nextToken).padStart(3,'0')}</div><div class="label">Next Token</div></div></div>
+    <div class="stat-card"><div class="stat-icon blue">🕐</div><div class="stat-info"><div class="value">${now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</div><div class="label">Current Time</div></div></div>
   </div>
   <div class="section-card">
-    <div class="section-header"><h3>📋 Register New Patient</h3></div>
+    <div class="section-header"><h3>📋 Register New Patient — ${currentUser.phc}</h3></div>
     <div class="section-body">
       <div id="regAlert" class="alert"></div>
       <div class="form-grid">
         <div class="form-group"><label>Full Name *</label><input id="reg_name" placeholder="Patient Name"></div>
-        <div class="form-group"><label>Age *</label><input id="reg_age" type="number" placeholder="Age"></div>
+        <div class="form-group"><label>Age *</label><input id="reg_age" type="number" placeholder="Age" min="0" max="120"></div>
         <div class="form-group"><label>Gender</label><select id="reg_gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
-        <div class="form-group"><label>Mobile (WhatsApp)</label><input id="reg_mobile" placeholder="Phone number"></div>
+        <div class="form-group"><label>Mobile</label><input id="reg_mobile" placeholder="Phone number"></div>
         <div class="form-group full"><label>Address</label><input id="reg_address" placeholder="Address"></div>
         <div class="form-group full">
           <label>Disease / Symptoms *</label>
-          <select id="reg_disease_type" onchange="updateDiseaseForm(this.value)" style="margin-bottom:8px;">
-            <option value="">-- Select Disease / General --</option>
-            <option>Fever</option><option>Diabetes</option><option>Hypertension</option>
-            <option>Cough & Cold</option><option>Diarrhea</option><option>Anemia</option>
-            <option>Eye Problem</option><option>Skin Disease</option><option>General Checkup</option><option>Other</option>
+          <select id="reg_disease_type" onchange="updateDiseaseForm(this.value)" style="margin-bottom:7px;">
+            <option value="">-- Select --</option>
+            <option>Fever</option><option>Diabetes</option><option>Hypertension</option><option>Cough & Cold</option><option>Diarrhea</option><option>Anemia</option><option>Eye Problem</option><option>Skin Disease</option><option>General Checkup</option><option>Other</option>
           </select>
-          <textarea id="reg_disease" rows="2" placeholder="Additional symptoms description..."></textarea>
+          <textarea id="reg_disease" rows="2" placeholder="Additional description..."></textarea>
           <div id="diseaseExtraFields"></div>
         </div>
-        <div class="form-group"><label>Referred Doctor</label><input id="reg_doctor" placeholder="Doctor name" value="Dr. Ramesh Kumar"></div>
+        <div class="form-group"><label>Doctor</label><input id="reg_doctor" placeholder="Doctor name" value="Dr. Ramesh Kumar"></div>
       </div>
-      <button class="btn btn-primary" onclick="registerPatient(${nextToken})" style="margin-top:8px;">🎫 Register & Generate Token</button>
+      <button class="btn btn-primary" onclick="registerPatient(${nextToken})" style="margin-top:10px;">🎫 Register & Generate Token</button>
     </div>
   </div>`;
 }
 
-async function registerPatient(token) {
+async function registerPatient(token){
   const name=document.getElementById('reg_name').value.trim();
   const age=document.getElementById('reg_age').value;
   const gender=document.getElementById('reg_gender').value;
   const mobile=document.getElementById('reg_mobile').value.trim();
   const address=document.getElementById('reg_address').value.trim();
-  const diseaseType=document.getElementById('reg_disease_type')?.value||'';
-  const diseaseNotes=document.getElementById('reg_disease').value.trim();
-  const disease=diseaseType?(diseaseNotes?diseaseType+' — '+diseaseNotes:diseaseType):diseaseNotes;
-  const extras=diseaseType?JSON.stringify(collectDiseaseExtras(diseaseType)):null;
+  const dt=document.getElementById('reg_disease_type')?.value||'';
+  const dn=document.getElementById('reg_disease').value.trim();
+  const disease=dt?(dn?dt+' — '+dn:dt):dn;
+  const extras=dt?JSON.stringify(collectExtras(dt)):null;
   const doctor=document.getElementById('reg_doctor').value.trim();
   if(!name||!age){showAlert('regAlert','error','Name and Age required!');return;}
-  const patientData={name,age:parseInt(age),gender,mobile,address,disease,disease_extras:extras,doctor,token_number:token,status:'waiting',phc:currentUser.phc};
-  const {error}=await db.from('patients').insert(patientData);
+  const now=new Date();
+  const pd={name,age:parseInt(age),gender,mobile,address,disease,disease_extras:extras,doctor,token_number:token,status:'waiting',phc:currentUser.phc,registration_date:now.toISOString().slice(0,10),registration_time:now.toTimeString().slice(0,8)};
+  const {data:inserted,error}=await db.from('patients').insert(pd).select().single();
   if(error){showAlert('regAlert','error','Error: '+error.message);return;}
-  if(mobile){
-    const msg=`🏥 *Virudhunagar PHC*\n\nவணக்கம் ${name}!\n\nஉங்கள் Token Number: *T-${String(token).padStart(3,'0')}*\nநோய்: ${disease||'General Checkup'}\nமருத்துவர்: ${doctor}\n\nதயவுசெய்து உங்கள் token call ஆகும்வரை காத்திருங்கள்.\n\n📍 ${currentUser.phc}`;
-    await sendWhatsApp(mobile,msg);
-  }
-  showAlert('regAlert','success',`✅ Token T-${String(token).padStart(3,'0')} registered successfully!`);
-  setTimeout(()=>showTokenPrint(patientData,token),800);
-  setTimeout(()=>loadRegister(),4000);
+  await auditLog('REGISTER_PATIENT','patients',inserted?.id,`Token T-${String(token).padStart(3,'0')} for ${name}`);
+  if(mobile){const msg=`🏥 *${currentUser.phc}*\n\nவணக்கம் ${name}!\nToken: *T-${String(token).padStart(3,'0')}*\nநேரம்: ${now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}\nநோய்: ${disease||'General'}\n\nToken call ஆகும்வரை காத்திருங்கள்.`;await sendWhatsApp(mobile,msg);}
+  showAlert('regAlert','success',`✅ Token T-${String(token).padStart(3,'0')} registered at ${now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}!`);
+  setTimeout(()=>showTokenPrint(pd,token),600);
+  setTimeout(()=>loadRegister(),3500);
 }
 
-// ── QUEUE ──
-async function loadQueue() {
+// ══════════════════════════════════════════
+// QUEUE
+// ══════════════════════════════════════════
+async function loadQueue(){
   const c=document.getElementById('mainContent');
-  c.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
+  c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   const {data}=await db.from('patients').select('*').eq('phc',currentUser.phc).order('token_number',{ascending:true});
   const waiting=(data||[]).filter(p=>p.status==='waiting');
   const done=(data||[]).filter(p=>p.status==='done');
   c.innerHTML=`
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-icon orange">⏳</div><div class="stat-info"><div class="value">${waiting.length}</div><div class="label">Waiting</div></div></div>
-    <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><div class="value">${done.length}</div><div class="label">Completed</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><div class="value">${done.length}</div><div class="label">Done</div></div></div>
   </div>
   <div class="section-card">
-    <div class="section-header"><h3>🎫 Token Queue</h3><button class="btn btn-outline btn-sm" onclick="loadQueue()">🔄 Refresh</button></div>
-    <div class="section-body">
-      <table><tr><th>Token</th><th>Name</th><th>Age</th><th>Disease</th><th>Mobile</th><th>Status</th><th>Print</th></tr>
-      ${(data||[]).map(p=>`<tr>
-        <td><strong>T-${String(p.token_number).padStart(3,'0')}</strong></td>
-        <td>${p.name}</td><td>${p.age}</td><td>${p.disease||'-'}</td><td>${p.mobile||'-'}</td>
-        <td><span class="badge badge-${p.status}">${p.status}</span></td>
-        <td><button class="btn btn-print btn-sm" onclick='showTokenPrint(${JSON.stringify(p).replace(/'/g,"&#39;")},${p.token_number})'>🖨️</button></td>
-      </tr>`).join()||'<tr><td colspan="7" style="text-align:center;color:var(--text-light)">No patients today</td></tr>'}
+    <div class="section-header"><h3>🎫 Token Queue — ${currentUser.phc}</h3><button class="btn btn-outline btn-sm" onclick="loadQueue()">🔄 Refresh</button></div>
+    <div class="section-body" style="overflow-x:auto;">
+      <table><tr><th>Token</th><th>Name</th><th>Age</th><th>Disease</th><th>Reg Time</th><th>Wait</th><th>Status</th><th>Print</th></tr>
+      ${(data||[]).map(p=>{
+        const regTime=p.registration_time||'';
+        const waitMins=p.waiting_minutes!=null?p.waiting_minutes+'m':
+          (p.status==='waiting'&&regTime?Math.round((Date.now()-new Date(p.created_at||Date.now()))/60000)+'m':'-');
+        return`<tr>
+          <td><strong>T-${String(p.token_number).padStart(3,'0')}</strong></td>
+          <td>${p.name}</td><td>${p.age}</td><td>${p.disease||'-'}</td>
+          <td style="font-size:11px;">${regTime.slice(0,5)||'-'}</td>
+          <td style="font-size:11px;${p.status==='waiting'?'color:var(--warning);font-weight:600;':''}">${waitMins}</td>
+          <td><span class="badge badge-${p.status}">${p.status}</span></td>
+          <td><button class="btn btn-print btn-sm" onclick='showTokenPrint(${JSON.stringify(p).replace(/'/g,"&#39;")},${p.token_number})'>🖨️</button></td>
+        </tr>`;
+      }).join()||'<tr><td colspan="8" style="text-align:center;color:var(--text-light)">No patients</td></tr>'}
       </table>
     </div>
   </div>`;
 }
 
-// ── DOCTOR QUEUE ──
-async function loadDocQueue() {
+// ══════════════════════════════════════════
+// DOCTOR QUEUE
+// ══════════════════════════════════════════
+async function loadDocQueue(){
   const c=document.getElementById('mainContent');
-  c.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
-  const {data:patients}=await db.from('patients').select('*').eq('phc',currentUser.phc).eq('status','waiting').order('token_number',{ascending:true});
+  c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const {data:waiting}=await db.from('patients').select('*').eq('phc',currentUser.phc).eq('status','waiting').order('token_number',{ascending:true});
   const {data:done}=await db.from('patients').select('*').eq('phc',currentUser.phc).eq('status','done').order('token_number',{ascending:false}).limit(5);
-  c.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+  c.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
     <div><div class="section-card">
-      <div class="section-header"><h3>⏳ Waiting (${(patients||[]).length})</h3><button class="btn btn-outline btn-sm" onclick="loadDocQueue()">🔄</button></div>
+      <div class="section-header"><h3>⏳ Waiting (${(waiting||[]).length})</h3><button class="btn btn-outline btn-sm" onclick="loadDocQueue()">🔄</button></div>
       <div class="section-body">
-        ${(patients||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">No patients waiting</p>':
-        (patients||[]).map(p=>`<div class="queue-item" onclick='openConsult(${JSON.stringify(p).replace(/"/g,"'")})'>
-          <div class="token-badge">${p.token_number}</div>
-          <div><strong style="font-size:14px;">${p.name}</strong>
-          <div style="font-size:12px;color:var(--text-light);">${p.age}y • ${p.gender} • ${p.disease||'No symptoms'}</div>
-          ${p.mobile?`<div style="font-size:11px;color:var(--success);">📱 ${p.mobile}</div>`:''}</div>
-        </div>`).join('')}
+        ${(waiting||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">No patients waiting</p>':
+        (waiting||[]).map(p=>{
+          const waitMins=p.registration_time?Math.round((Date.now()-new Date(p.created_at||Date.now()))/60000):null;
+          return`<div class="queue-item" onclick='openConsult(${JSON.stringify(p).replace(/"/g,"'")})'>
+            <div class="token-badge">${p.token_number}</div>
+            <div style="flex:1;"><strong style="font-size:13px;">${p.name}</strong>
+            <div style="font-size:11px;color:var(--text-light);">${p.age}y • ${p.gender} • ${p.disease||'No symptoms'}</div>
+            ${waitMins!=null?`<div style="font-size:11px;color:var(--warning);">⏱ Waiting ${waitMins}m</div>`:''}
+            </div>
+          </div>`;
+        }).join('')}
       </div>
     </div></div>
     <div><div class="section-card">
@@ -726,388 +686,108 @@ async function loadDocQueue() {
         ${(done||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">None yet</p>':
         (done||[]).map(p=>`<div class="queue-item" style="cursor:default;opacity:.7;">
           <div class="token-badge" style="background:var(--success);">${p.token_number}</div>
-          <div><strong>${p.name}</strong><div style="font-size:12px;color:var(--text-light);">Completed ✓</div></div>
+          <div><strong>${p.name}</strong>
+          <div style="font-size:11px;color:var(--text-light);">${p.consultation_minutes!=null?`⏱ ${p.consultation_minutes}m consult`:'Completed ✓'}</div></div>
         </div>`).join('')}
       </div>
     </div></div>
   </div>`;
 }
 
-function openConsult(p) {
+function openConsult(p){
   currentPatient=p;
+  const consultStart=new Date().toISOString();
+  currentPatient._consultStart=consultStart;
+  const waitMins=p.registration_time?Math.round((Date.now()-new Date(p.created_at||Date.now()))/60000):null;
   document.getElementById('consultBody').innerHTML=`
-  <div style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:16px;">
-    <div style="display:flex;align-items:center;gap:14px;">
-      <div class="token-badge" style="width:52px;height:52px;font-size:20px;">${p.token_number}</div>
-      <div><div style="font-size:18px;font-weight:700;">${p.name}</div>
-      <div style="font-size:13px;color:var(--text-light);">${p.age}y • ${p.gender} • ${p.mobile||'No mobile'}</div>
-      <div style="font-size:12px;color:var(--text-light);">${p.address||''}</div></div>
-    </div>
+  ${waitMins!=null?`<div class="waiting-info">⏱ Patient waited <strong>${waitMins} minutes</strong> before consultation</div>`:''}
+  <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
+    <div class="token-badge" style="width:46px;height:46px;font-size:18px;">${p.token_number}</div>
+    <div><div style="font-size:16px;font-weight:700;">${p.name}</div>
+    <div style="font-size:12px;color:var(--text-light);">${p.age}y • ${p.gender} • ${p.mobile||'No mobile'}</div></div>
   </div>
   <div class="form-group"><label>Chief Complaint</label><input id="ct_complaint" value="${p.disease||''}" placeholder="Symptoms"></div>
-  <div class="form-group"><label>Diagnosis</label><input id="ct_diagnosis" placeholder="Doctor's diagnosis"></div>
-  <div class="form-group"><label>Treatment / Prescription</label><textarea id="ct_treatment" rows="3" placeholder="Medicines, dosage, instructions..."></textarea></div>
+  <div class="form-group"><label>Diagnosis *</label><input id="ct_diagnosis" placeholder="Doctor's diagnosis"></div>
+  <div class="form-group"><label>Prescription / Treatment</label><textarea id="ct_treatment" rows="3" placeholder="Medicines, dosage..."></textarea></div>
   <div class="form-group"><label>Follow-up Date</label><input id="ct_followup" type="date"></div>
   <div id="consultAlert" class="alert"></div>`;
   document.getElementById('consultModal').classList.add('open');
 }
 
-async function sendConsultWA() { await saveTreatment(true); }
-
-async function saveTreatment(sendWAFlag) {
-  if(!currentPatient) return;
-  const diagnosis=document.getElementById('ct_diagnosis').value.trim();
+async function saveTreatment(sendWA){
+  if(!currentPatient)return;
+  const diag=document.getElementById('ct_diagnosis').value.trim();
   const treatment=document.getElementById('ct_treatment').value.trim();
   const followup=document.getElementById('ct_followup').value;
-  const {error}=await db.from('patients').update({status:'done'}).eq('id',currentPatient.id);
+  const consultEnd=new Date();
+  const consultStart=currentPatient._consultStart?new Date(currentPatient._consultStart):consultEnd;
+  const consultMins=Math.round((consultEnd-consultStart)/60000);
+  const regTime=currentPatient.created_at?new Date(currentPatient.created_at):consultEnd;
+  const waitMins=Math.round((consultStart-regTime)/60000);
+  const {error}=await db.from('patients').update({status:'done',consultation_start:consultStart.toISOString(),consultation_end:consultEnd.toISOString(),consultation_minutes:consultMins,waiting_minutes:waitMins}).eq('id',currentPatient.id);
   if(error){showAlert('consultAlert','error','Error saving');return;}
-  if(sendWAFlag && currentPatient.mobile) {
-    const msg=`🏥 *Virudhunagar PHC - Treatment Summary*\n\nவணக்கம் ${currentPatient.name}!\n\n📋 *Diagnosis:* ${diagnosis||'General Treatment'}\n💊 *Treatment:* ${treatment||'As prescribed'}\n📅 *Follow-up:* ${followup||'As needed'}\n\n${currentUser.phc}`;
-    const ok=await sendWhatsApp(currentPatient.mobile,msg);
-    showAlert('consultAlert', ok?'success':'error', ok?'✅ Treatment saved & WhatsApp sent!':'✅ Treatment saved but WhatsApp failed');
-    setTimeout(()=>{closeModal('consultModal');loadDocQueue();},2000);
-  } else {
-    closeModal('consultModal');
-    loadDocQueue();
+  if(diag||treatment){
+    await db.from('prescriptions').insert({patient_name:currentPatient.name,patient_token:`T-${String(currentPatient.token_number).padStart(3,'0')}`,patient_mobile:currentPatient.mobile||'',diagnosis:diag,medicines:JSON.stringify([{name:treatment,dosage:'As directed',timing:'As prescribed',days:'5'}]),medicines_count:1,notes:'',follow_up_date:followup||null,doctor_name:currentUser.name,phc:currentUser.phc,dispensed:false});
   }
+  await auditLog('CONSULTATION','patients',currentPatient.id,`Diag:${diag} Wait:${waitMins}m Consult:${consultMins}m`);
+  if(sendWA&&currentPatient.mobile){
+    const msg=`🏥 *${currentUser.phc}*\n\nவணக்கம் ${currentPatient.name}!\n\n📋 Diagnosis: ${diag||'General'}\n💊 Treatment: ${treatment||'As prescribed'}\n📅 Follow-up: ${followup||'As needed'}\n⏱ Wait time: ${waitMins}m\n\n${currentUser.phc}`;
+    await sendWhatsApp(currentPatient.mobile,msg);
+    showAlert('consultAlert','success','✅ Saved & WhatsApp sent!');
+  }else{showAlert('consultAlert','success','✅ Consultation saved!');}
+  setTimeout(()=>{closeModal('consultModal');loadDocQueue();},1500);
 }
-
-// ── PREGNANCY ──
-async function loadPregnancy() {
+// ══════════════════════════════════════════
+// PRESCRIPTIONS
+// ══════════════════════════════════════════
+async function loadPrescription(){
   const c=document.getElementById('mainContent');
-  c.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
-  const {data}=await db.from('pregnancy').select('*').eq('phc',currentUser.phc).order('created_at',{ascending:false});
-  const active=(data||[]).filter(p=>p.status==='active').length;
-  const highRisk=(data||[]).filter(p=>p.high_risk==='Yes').length;
-  c.innerHTML=`
-  <div class="stats-grid">
-    <div class="stat-card"><div class="stat-icon purple">🤰</div><div class="stat-info"><div class="value">${active}</div><div class="label">Active Cases</div></div></div>
-    <div class="stat-card"><div class="stat-icon red">⚠️</div><div class="stat-info"><div class="value">${highRisk}</div><div class="label">High Risk</div></div></div>
-    <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><div class="value">${(data||[]).length-active}</div><div class="label">Delivered</div></div></div>
-  </div>
-  <div class="section-card">
-    <div class="section-header"><h3>🤰 Pregnancy Cases</h3>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-whatsapp btn-sm" onclick="sendMonthlyReminders()">📱 Send Reminders</button>
-        <button class="btn btn-success btn-sm" onclick="document.getElementById('pregModal').classList.add('open')">+ Register</button>
-      </div>
-    </div>
-    <div class="section-body">
-      ${(data||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">No cases registered yet.</p>':
-      (data||[]).map(p=>{
-        const lmp=new Date(p.lmp_date);
-        const weeks=Math.floor((Date.now()-lmp)/(7*24*60*60*1000));
-        const pct=Math.min(Math.round(weeks/40*100),100);
-        return `<div class="preg-card">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
-            <div><div class="preg-id">${p.unique_id}</div>
-            <div style="font-size:15px;font-weight:600;">${p.name}</div>
-            <div class="preg-meta">${p.age}y • 📱 ${p.mobile||'No mobile'} • ${p.blood_group}</div></div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-              <span class="badge ${p.high_risk==='Yes'?'badge-critical':'badge-active'}">${p.high_risk==='Yes'?'High Risk':'Normal'}</span>
-              ${p.mobile?`<button class="btn btn-whatsapp btn-sm" onclick="sendPregReminder('${p.mobile}','${p.name}','${p.unique_id}',${weeks},'${p.edd}')">📱 Remind</button>`:''}
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-            <span style="background:var(--bg);padding:3px 8px;border-radius:6px;font-size:11px;color:var(--text-light);">Week ${weeks}</span>
-            <span style="background:var(--bg);padding:3px 8px;border-radius:6px;font-size:11px;color:var(--text-light);">EDD: ${p.edd}</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-          <div style="text-align:right;font-size:11px;color:var(--text-light);margin-top:4px;">${pct}% complete</div>
-        </div>`;
-      }).join('')}
-    </div>
-  </div>`;
-}
-
-async function sendPregReminder(mobile,name,uid,weeks,edd) {
-  const msg=`🏥 *Virudhunagar PHC - Pregnancy Reminder*\n\nவணக்கம் ${name}!\n\nID: *${uid}*\nதற்போதைய வாரம்: *${weeks} வாரங்கள்*\nகுழந்தை பிறப்பு தேதி: *${edd}*\n\n📅 உங்கள் மாதாந்திர checkup-க்கு வாருங்கள்.\n\n${currentUser.phc}`;
-  const ok=await sendWhatsApp(mobile,msg);
-  alert(ok?`✅ Reminder sent to ${name}!`:`❌ Failed to send to ${name}`);
-}
-
-async function sendMonthlyReminders() {
-  const {data}=await db.from('pregnancy').select('*').eq('phc',currentUser.phc).eq('status','active');
-  if(!data||data.length===0){alert('No active cases');return;}
-  let sent=0;
-  for(const p of data){if(p.mobile){const weeks=Math.floor((Date.now()-new Date(p.lmp_date))/(7*24*60*60*1000));await sendPregReminder(p.mobile,p.name,p.unique_id,weeks,p.edd);sent++;}}
-  alert(`✅ Reminders sent to ${sent} patients!`);
-}
-
-async function registerPregnancy() {
-  const name=document.getElementById('pm_name').value.trim();
-  const age=document.getElementById('pm_age').value;
-  const mobile=document.getElementById('pm_mobile').value.trim();
-  const blood=document.getElementById('pm_blood').value;
-  const address=document.getElementById('pm_address').value.trim();
-  const lmp=document.getElementById('pm_lmp').value;
-  const risk=document.getElementById('pm_risk').value;
-  if(!name||!age||!lmp){showAlert('pregAlert','error','Name, Age, LMP Date required!');return;}
-  const year=new Date().getFullYear();
-  const {count}=await db.from('pregnancy').select('id',{count:'exact'});
-  const uid=`VRD-P-${year}-${String((count||0)+1).padStart(3,'0')}`;
-  const lmpDate=new Date(lmp);
-  const edd=new Date(lmpDate.getTime()+280*24*60*60*1000).toISOString().slice(0,10);
-  const weeks=Math.floor((Date.now()-lmpDate)/(7*24*60*60*1000));
-  const {error}=await db.from('pregnancy').insert({unique_id:uid,name,age:parseInt(age),mobile,address,blood_group:blood,lmp_date:lmp,edd,weeks,high_risk:risk,hospital:currentUser.phc,status:'active',phc:currentUser.phc});
-  if(error){showAlert('pregAlert','error','Error: '+error.message);return;}
-  if(mobile){
-    const msg=`🏥 *Virudhunagar PHC - Pregnancy Registration*\n\nவணக்கம் ${name}!\n\n🆔 *Unique ID: ${uid}*\n📅 *EDD: ${edd}*\n🩺 *Blood Group: ${blood}*\n\nஒவ்வொரு மாதமும் checkup-க்கு வர மறக்காதீர்கள்.\n\n💚 ${currentUser.phc}`;
-    await sendWhatsApp(mobile,msg);
-    showAlert('pregAlert','success',`✅ Registered! ID: ${uid} | WhatsApp sent!`);
-  } else {
-    showAlert('pregAlert','success',`✅ Registered! ID: ${uid}`);
-  }
-  setTimeout(()=>{closeModal('pregModal');loadPregnancy();},2500);
-}
-
-// ── MEDICINE ──
-async function loadMedicine() {
-  const c=document.getElementById('mainContent');
-  c.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
-  const {data}=await db.from('medicine').select('*').eq('phc',currentUser.phc).order('name');
-  const low=(data||[]).filter(m=>m.stock<m.min_level);
-  c.innerHTML=`
-  ${low.length>0?`<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:14px;margin-bottom:20px;font-size:13px;color:#856404;">⚠️ <strong>${low.length} medicines</strong> low stock: ${low.map(m=>m.name).join(', ')}</div>`:''}
-  <div class="section-card">
-    <div class="section-header"><h3>💊 Medicine Stock</h3></div>
-    <div class="section-body">
-      <table><tr><th>Medicine</th><th>Category</th><th>Stock</th><th>Min Level</th><th>Status</th><th>Expiry</th></tr>
-      ${(data||[]).map(m=>{
-        const badge=m.stock<m.min_level?(m.stock<m.min_level/2?'badge-critical':'badge-low'):'badge-ok';
-        const label=m.stock<m.min_level?(m.stock<m.min_level/2?'Critical':'Low'):'OK';
-        return `<tr><td><strong>${m.name}</strong></td><td>${m.category}</td><td>${m.stock}</td><td>${m.min_level}</td><td><span class="badge ${badge}">${label}</span></td><td style="font-size:12px;">${m.expiry_date||'-'}</td></tr>`;
-      }).join()||'<tr><td colspan="6" style="text-align:center;color:var(--text-light)">No data</td></tr>'}
-      </table>
-    </div>
-  </div>`;
-}
-
-// ── WHATSAPP CENTER ──
-function loadWhatsApp() {
-  const c=document.getElementById('mainContent');
-  c.innerHTML=`
-  <div class="section-card" style="margin-bottom:20px;">
-    <div class="section-header"><h3>📱 Send Custom WhatsApp</h3></div>
-    <div class="section-body">
-      <div class="form-grid">
-        <div class="form-group"><label>Mobile Number</label><input id="custom_to" placeholder="91XXXXXXXXXX"></div>
-        <div class="form-group"><label>Patient Name</label><input id="custom_name" placeholder="Patient name"></div>
-        <div class="form-group full"><label>Message</label><textarea id="custom_msg" rows="4" placeholder="Type your message..."></textarea></div>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
-        <button class="btn btn-outline btn-sm" onclick="setTemplate('appointment')">📅 Appointment</button>
-        <button class="btn btn-outline btn-sm" onclick="setTemplate('reminder')">🔔 Reminder</button>
-        <button class="btn btn-outline btn-sm" onclick="setTemplate('report')">📋 Report Ready</button>
-        <button class="btn btn-outline btn-sm" onclick="setTemplate('vaccination')">💉 Vaccination</button>
-      </div>
-      <div id="customWaAlert" class="alert"></div>
-      <button class="btn btn-whatsapp" onclick="sendCustomWA()">📱 Send WhatsApp</button>
-    </div>
-  </div>
-  <div class="section-card">
-    <div class="section-header"><h3>📋 Message Log (This Session)</h3></div>
-    <div class="section-body" id="waLogBody">
-      ${waLogs.length===0?'<p style="color:var(--text-light);font-size:13px;">No messages sent yet this session.</p>':
-      waLogs.map(w=>`<div class="wa-log">
-        <div class="wa-to">📱 ${w.to} <span class="wa-status ${w.status==='sent'?'wa-sent':'wa-failed'}">${w.status==='sent'?'✅ Sent':'❌ Failed'}</span></div>
-        <div class="wa-msg">${w.message}</div>
-        <div class="wa-time">${w.time}</div>
-      </div>`).join('')}
-    </div>
-  </div>`;
-}
-
-function setTemplate(type) {
-  const name=document.getElementById('custom_name').value||'Patient';
-  const t={
-    appointment:`🏥 *Virudhunagar PHC*\n\nவணக்கம் ${name}!\n\nஉங்கள் appointment confirm ஆகியது.\n📅 தேதி: ${new Date().toLocaleDateString('ta-IN')}\n⏰ நேரம்: காலை 9:00 AM\n\n${currentUser.phc}`,
-    reminder:`🏥 *Virudhunagar PHC*\n\nவணக்கம் ${name}!\n\n📅 உங்கள் checkup reminder!\n\nPHC-ல் வாருங்கள்.\n\n${currentUser.phc}`,
-    report:`🏥 *Virudhunagar PHC*\n\nவணக்கம் ${name}!\n\n📋 உங்கள் test report தயாராகிவிட்டது.\n\nPHC-ல் வந்து எடுத்துக்கொள்ளுங்கள்.\n\n${currentUser.phc}`,
-    vaccination:`🏥 *Virudhunagar PHC*\n\nவணக்கம் ${name}!\n\n💉 Vaccination Reminder!\n\nகுழந்தைக்கு vaccine போட வேண்டிய நேரம்.\n\n${currentUser.phc}`
-  };
-  document.getElementById('custom_msg').value=t[type]||'';
-}
-
-async function sendCustomWA() {
-  const to=document.getElementById('custom_to').value.trim();
-  const msg=document.getElementById('custom_msg').value.trim();
-  if(!to||!msg){showAlert('customWaAlert','error','Number and message required!');return;}
-  showAlert('customWaAlert','info','Sending...');
-  const ok=await sendWhatsApp(to,msg);
-  if(ok){showAlert('customWaAlert','success','✅ WhatsApp sent successfully!');loadWhatsApp();}
-  else{showAlert('customWaAlert','error','❌ Failed to send. Check number and try again.');}
-}
-
-// ── ATTENDANCE ──
-async function loadAttendance() {
-  const c=document.getElementById('mainContent');
-  c.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
-  const today=new Date().toISOString().slice(0,10);
-  const {data}=await db.from('attendance').select('*').eq('phc',currentUser.phc).order('created_at',{ascending:false}).limit(30);
-  const todayRec=(data||[]).find(a=>a.date===today&&a.user_name===currentUser.name);
-  function locBadge(rec){
-    if(!rec)return'';
-    if(rec.status==='within_phc'||rec.status==='present'){const d=rec.distance_from_phc!=null?` · ${rec.distance_from_phc}m`:'';return`<span class="badge badge-active">📍 Within PHC${d}</span>`;}
-    if(rec.status==='outside_phc')return`<span class="badge badge-critical">⚠️ Outside PHC · ${rec.distance_from_phc||'?'}m</span>`;
-    return`<span class="badge badge-waiting">📵 No GPS</span>`;
-  }
-  function mapLink(rec){
-    if(!rec||!rec.latitude)return'-';
-    return`<a href="https://www.google.com/maps?q=${rec.latitude},${rec.longitude}" target="_blank" style="color:var(--primary);font-size:11px;">🗺 View</a>`;
-  }
-  c.innerHTML=`
-  <div class="section-card" style="margin-bottom:20px;">
-    <div class="section-header"><h3>📅 My Attendance Today</h3></div>
-    <div class="section-body">
-      ${todayRec?`<div style="display:flex;align-items:center;gap:12px;background:#d4edda;border-radius:10px;padding:14px;margin-bottom:12px;">
-        <span style="font-size:30px;">✅</span>
-        <div><strong>${currentUser.name}</strong>
-        <div style="font-size:13px;color:#155724;">Checked in at ${todayRec.check_in}</div>
-        <div style="margin-top:6px;">${locBadge(todayRec)}</div></div>
-      </div>`:
-      `<div style="display:flex;align-items:center;gap:12px;background:#fff3cd;border-radius:10px;padding:14px;">
-        <span style="font-size:30px;">⚠️</span>
-        <div><strong>${currentUser.name}</strong><div style="font-size:13px;color:#856404;">Not checked in yet today</div></div>
-      </div>`}
-    </div>
-  </div>
-  <div class="section-card">
-    <div class="section-header"><h3>📋 PHC Attendance Log</h3></div>
-    <div class="section-body" style="overflow-x:auto;">
-      <table><tr><th>Staff Name</th><th>Role</th><th>Date</th><th>Check-In</th><th>Location</th><th>Map</th></tr>
-      ${(data||[]).map(a=>`<tr>
-        <td><strong>${a.user_name}</strong></td>
-        <td style="text-transform:capitalize;">${a.role}</td>
-        <td>${a.date}</td><td>${a.check_in||'-'}</td>
-        <td>${locBadge(a)}</td><td>${mapLink(a)}</td>
-      </tr>`).join()||'<tr><td colspan="6" style="text-align:center;color:var(--text-light)">No records</td></tr>'}
-      </table>
-    </div>
-  </div>`;
-}
-
-// ── DDHS ──
-async function loadAllPHCs() {
-  const c=document.getElementById('mainContent');
-  const phcList=['Virudhunagar Main PHC','Aruppukottai PHC','Sivakasi PHC','Rajapalayam PHC','Srivilliputhur PHC','Sattur PHC','Thiruchuli PHC','Kariapatti PHC'];
-  const stats=await Promise.all(phcList.map(async phc=>{
-    const [{count:pat},{count:preg}]=await Promise.all([
-      db.from('patients').select('id',{count:'exact'}).eq('phc',phc),
-      db.from('pregnancy').select('id',{count:'exact'}).eq('phc',phc),
-    ]);
-    return{phc,pat:pat||0,preg:preg||0};
-  }));
-  c.innerHTML=`<div class="section-card"><div class="section-header"><h3>🏥 All PHCs — Virudhunagar District</h3></div><div class="section-body">
-    <table><tr><th>PHC Name</th><th>Patients Today</th><th>Pregnancy Cases</th><th>Status</th></tr>
-    ${stats.map(s=>`<tr><td><strong>${s.phc}</strong></td><td>${s.pat}</td><td>${s.preg}</td><td><span class="badge badge-active">Active</span></td></tr>`).join('')}
-    </table></div></div>`;
-}
-
-async function loadAllPatients() {
-  const c=document.getElementById('mainContent');
-  c.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
-  const {data}=await db.from('patients').select('*').order('created_at',{ascending:false}).limit(50);
-  const cutoff=new Date(Date.now()-90*24*60*60*1000).toISOString();
-  const {data:lostPatients}=await db.from('patients').select('*').lt('created_at',cutoff).eq('status','done').not('mobile','is',null).limit(10);
-  c.innerHTML=`
-  ${(lostPatients||[]).length>0?`<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:14px;margin-bottom:20px;">
-    <div style="font-weight:700;color:#856404;margin-bottom:8px;">⚠️ ${(lostPatients||[]).length} patients not visited in 3+ months</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      ${(lostPatients||[]).slice(0,5).map(p=>p.mobile?`<button class="btn btn-warning btn-sm" onclick="send3MonthAlert('${p.mobile}','${p.name}')">📱 Alert ${p.name}</button>`:'').join('')}
-      <button class="btn btn-outline btn-sm" onclick="sendAll3MonthAlerts()">Send All Alerts</button>
-    </div>
-  </div>`:''}
-  <div class="section-card"><div class="section-header"><h3>👥 All Patients — District Wide</h3></div><div class="section-body">
-    <table><tr><th>Token</th><th>Name</th><th>Age</th><th>Disease</th><th>PHC</th><th>Status</th><th>Print</th></tr>
-    ${(data||[]).map(p=>`<tr>
-      <td>T-${String(p.token_number).padStart(3,'0')}</td><td>${p.name}</td><td>${p.age}</td>
-      <td>${p.disease||'-'}</td><td style="font-size:12px;">${p.phc}</td>
-      <td><span class="badge badge-${p.status}">${p.status}</span></td>
-      <td><button class="btn btn-print btn-sm" onclick='showTokenPrint(${JSON.stringify(p).replace(/'/g,"&#39;")},${p.token_number})'>🖨️</button></td>
-    </tr>`).join()||'<tr><td colspan="7" style="text-align:center;color:var(--text-light)">No data</td></tr>'}
-    </table></div></div>`;
-}
-
-// ── DISEASE FORMS ──
-const DISEASE_FORMS = {
-  'Fever':[{id:'fever_days',label:'Fever since (days)',type:'number'},{id:'fever_temp',label:'Temperature (°F)',type:'number'},{id:'chills',label:'Chills',type:'select',opts:['Yes','No']},{id:'bodyache',label:'Body ache',type:'select',opts:['Yes','No']}],
-  'Diabetes':[{id:'sugar_fasting',label:'Fasting Sugar (mg/dL)',type:'number'},{id:'sugar_pp',label:'PP Sugar (mg/dL)',type:'number'},{id:'insulin',label:'On Insulin?',type:'select',opts:['Yes','No']}],
-  'Hypertension':[{id:'bp_systolic',label:'BP Systolic',type:'number'},{id:'bp_diastolic',label:'BP Diastolic',type:'number'},{id:'bp_meds',label:'On BP Meds?',type:'select',opts:['Yes','No']}],
-  'Cough & Cold':[{id:'cough_days',label:'Cough since (days)',type:'number'},{id:'cough_type',label:'Cough type',type:'select',opts:['Dry','Wet','With blood']},{id:'breathless',label:'Breathlessness',type:'select',opts:['No','Mild','Severe']}],
-  'Diarrhea':[{id:'motions',label:'Motions per day',type:'number'},{id:'blood_stool',label:'Blood in stool?',type:'select',opts:['Yes','No']},{id:'vomiting',label:'Vomiting?',type:'select',opts:['Yes','No']}],
-  'Anemia':[{id:'hb_level',label:'Hb Level (g/dL)',type:'number'},{id:'pallor',label:'Pallor?',type:'select',opts:['Yes','No']},{id:'fatigue',label:'Fatigue',type:'select',opts:['Mild','Moderate','Severe']}],
-};
-
-function getDiseaseExtraFields(disease) {
-  const fields=DISEASE_FORMS[disease];
-  if(!fields)return'';
-  return`<div style="background:#f0f8f4;border-radius:10px;padding:14px;margin-top:4px;">
-    <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:10px;">📋 ${disease} — Additional Details</div>
-    <div class="form-grid">${fields.map(f=>`<div class="form-group"><label>${f.label}</label>
-      ${f.type==='select'?`<select id="dx_${f.id}">${f.opts.map(o=>`<option>${o}</option>`).join('')}</select>`:`<input id="dx_${f.id}" type="${f.type}" placeholder="${f.label}">`}
-    </div>`).join('')}</div></div>`;
-}
-
-function collectDiseaseExtras(disease) {
-  const fields=DISEASE_FORMS[disease];
-  if(!fields)return{};
-  const result={};
-  fields.forEach(f=>{const el=document.getElementById('dx_'+f.id);if(el)result[f.id]=el.value;});
-  return result;
-}
-
-function updateDiseaseForm(disease){document.getElementById('diseaseExtraFields').innerHTML=getDiseaseExtraFields(disease);}
-
-// ── PRESCRIPTIONS ──
-async function loadPrescription() {
-  const c=document.getElementById('mainContent');
-  c.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
+  c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   const {data}=await db.from('prescriptions').select('*').eq('phc',currentUser.phc).order('created_at',{ascending:false}).limit(20);
   c.innerHTML=`
-  <div class="section-card" style="margin-bottom:20px;">
-    <div class="section-header"><h3>📝 New Prescription</h3><button class="btn btn-outline btn-sm" onclick="loadPrescription()">🔄 Refresh</button></div>
+  <div class="section-card" style="margin-bottom:18px;">
+    <div class="section-header"><h3>📝 New Prescription</h3></div>
     <div class="section-body">
       <div id="rxAlert" class="alert"></div>
       <div class="form-grid">
-        <div class="form-group"><label>Patient Token / Name *</label><input id="rx_patient" placeholder="T-001 or patient name"></div>
-        <div class="form-group"><label>Patient Mobile</label><input id="rx_mobile" placeholder="Mobile number"></div>
-        <div class="form-group full"><label>Diagnosis</label><input id="rx_diagnosis" placeholder="Doctor's diagnosis"></div>
+        <div class="form-group"><label>Patient Token / Name *</label><input id="rx_patient" placeholder="T-001 or name"></div>
+        <div class="form-group"><label>Patient Mobile</label><input id="rx_mobile" placeholder="Mobile"></div>
+        <div class="form-group full"><label>Diagnosis</label><input id="rx_diagnosis" placeholder="Diagnosis"></div>
       </div>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">💊 Medicines</label>
+      <div style="margin-bottom:11px;">
+        <label style="font-size:12px;font-weight:600;display:block;margin-bottom:5px;">💊 Medicines</label>
         <div id="rxMedsList">
-          <div class="rx-med-row" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center;">
-            <input placeholder="Medicine name" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-            <input placeholder="Dosage" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-            <select style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;"><option>Morning</option><option>Afternoon</option><option>Night</option><option>Morning+Night</option><option>TDS</option><option>OD</option><option>BD</option></select>
-            <input placeholder="Days" type="number" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+          <div class="rx-med-row" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:7px;margin-bottom:7px;align-items:center;">
+            <input placeholder="Medicine name" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;">
+            <input placeholder="Dosage" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;">
+            <select style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;"><option>Morning</option><option>Afternoon</option><option>Night</option><option>Morning+Night</option><option>TDS</option><option>OD</option><option>BD</option></select>
+            <input placeholder="Days" type="number" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;">
             <button onclick="this.closest('.rx-med-row').remove()" class="btn btn-danger btn-sm">×</button>
           </div>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="addMedRow()" style="margin-top:4px;">+ Add Medicine</button>
+        <button class="btn btn-outline btn-sm" onclick="addMedRow()">+ Add Medicine</button>
       </div>
-      <div class="form-group"><label>Instructions / Notes</label><textarea id="rx_notes" rows="2" placeholder="Take after food..."></textarea></div>
+      <div class="form-group"><label>Instructions</label><textarea id="rx_notes" rows="2" placeholder="Take after food..."></textarea></div>
       <div class="form-group"><label>Follow-up Date</label><input id="rx_followup" type="date"></div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:6px;">
         <button class="btn btn-primary" style="flex:1;" onclick="savePrescription(true)">💊 Save & Send to Pharmacy</button>
         <button class="btn btn-outline" onclick="savePrescription(false)">Save Only</button>
-        <button class="btn btn-outline" id="voiceBtn" onclick="toggleVoice()">🎤 Voice Input</button>
+        <button class="btn btn-outline" id="voiceBtn" onclick="toggleVoice()">🎤 Voice</button>
       </div>
-      <div id="voiceStatus" style="font-size:12px;color:var(--primary);margin-top:8px;display:none;">🎤 Listening...</div>
+      <div id="voiceStatus" style="font-size:11px;color:var(--primary);margin-top:6px;display:none;">🎤 Listening...</div>
     </div>
   </div>
   <div class="section-card">
     <div class="section-header"><h3>📋 Recent Prescriptions</h3></div>
-    <div class="section-body">
+    <div class="section-body" style="overflow-x:auto;">
       <table><tr><th>Date</th><th>Patient</th><th>Diagnosis</th><th>Medicines</th><th>Status</th></tr>
       ${(data||[]).length===0?'<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No prescriptions yet</td></tr>':
       (data||[]).map(rx=>`<tr>
-        <td style="font-size:12px;">${rx.created_at?.slice(0,10)||'-'}</td>
-        <td><strong>${rx.patient_name||rx.patient_token||'-'}</strong></td>
-        <td>${rx.diagnosis||'-'}</td>
-        <td style="font-size:12px;">${rx.medicines_count||0} items</td>
-        <td><span class="badge ${rx.dispensed?'badge-done':'badge-waiting'}">${rx.dispensed?'Dispensed':'Pending'}</span></td>
+        <td style="font-size:11px;">${rx.created_at?.slice(0,10)||'-'}</td>
+        <td><strong>${rx.patient_name||'-'}</strong><div style="font-size:10px;color:var(--text-light);">${rx.patient_token||''}</div></td>
+        <td style="font-size:12px;">${rx.diagnosis||'-'}</td>
+        <td style="font-size:11px;">${rx.medicines_count||0} items</td>
+        <td><span class="badge ${rx.dispensed?'badge-dispensed':'badge-pending'}">${rx.dispensed?'✅ Dispensed':'⏳ Pending'}</span></td>
       </tr>`).join('')}
       </table>
     </div>
@@ -1117,260 +797,681 @@ async function loadPrescription() {
 function addMedRow(){
   const row=document.createElement('div');
   row.className='rx-med-row';
-  row.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center;';
-  row.innerHTML=`<input placeholder="Medicine name" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-    <input placeholder="Dosage" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-    <select style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;"><option>Morning</option><option>Afternoon</option><option>Night</option><option>Morning+Night</option><option>TDS</option><option>OD</option><option>BD</option></select>
-    <input placeholder="Days" type="number" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-    <button onclick="this.closest('.rx-med-row').remove()" class="btn btn-danger btn-sm">×</button>`;
+  row.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:7px;margin-bottom:7px;align-items:center;';
+  row.innerHTML=`<input placeholder="Medicine name" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;"><input placeholder="Dosage" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;"><select style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;"><option>Morning</option><option>Afternoon</option><option>Night</option><option>Morning+Night</option><option>TDS</option><option>OD</option><option>BD</option></select><input placeholder="Days" type="number" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;"><button onclick="this.closest('.rx-med-row').remove()" class="btn btn-danger btn-sm">×</button>`;
   document.getElementById('rxMedsList').appendChild(row);
 }
 
 let recognition=null,voiceActive=false;
 function toggleVoice(){
-  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){alert('Use Chrome for voice input.');return;}
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){alert('Use Chrome for voice.');return;}
   if(voiceActive){recognition?.stop();return;}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   recognition=new SR();recognition.lang='en-IN';recognition.continuous=true;recognition.interimResults=true;
   let finalText=document.getElementById('rx_notes').value;
   recognition.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)finalText+=e.results[i][0].transcript+' ';else interim=e.results[i][0].transcript;}document.getElementById('rx_notes').value=finalText+interim;};
-  recognition.onstart=()=>{voiceActive=true;document.getElementById('voiceBtn').textContent='⏹ Stop Voice';document.getElementById('voiceStatus').style.display='block';};
-  recognition.onend=()=>{voiceActive=false;document.getElementById('voiceBtn').textContent='🎤 Voice Input';document.getElementById('voiceStatus').style.display='none';};
+  recognition.onstart=()=>{voiceActive=true;document.getElementById('voiceBtn').textContent='⏹ Stop';document.getElementById('voiceStatus').style.display='block';};
+  recognition.onend=()=>{voiceActive=false;document.getElementById('voiceBtn').textContent='🎤 Voice';document.getElementById('voiceStatus').style.display='none';};
   recognition.start();
 }
 
-async function savePrescription(sendToPharmacy){
+async function savePrescription(sendToPharm){
   const patient=document.getElementById('rx_patient').value.trim();
   const mobile=document.getElementById('rx_mobile').value.trim();
   const diag=document.getElementById('rx_diagnosis').value.trim();
   const notes=document.getElementById('rx_notes').value.trim();
   const followup=document.getElementById('rx_followup').value;
-  if(!patient){showAlert('rxAlert','error','Patient name/token required!');return;}
+  if(!patient){showAlert('rxAlert','error','Patient name required!');return;}
   const rows=document.querySelectorAll('.rx-med-row');
   const meds=[];
-  rows.forEach(row=>{const inputs=row.querySelectorAll('input,select');if(inputs[0].value.trim())meds.push({name:inputs[0].value,dosage:inputs[1].value,timing:inputs[2].value,days:inputs[3].value});});
+  rows.forEach(row=>{const inputs=row.querySelectorAll('input,select');if(inputs[0]?.value?.trim())meds.push({name:inputs[0].value,dosage:inputs[1].value,timing:inputs[2].value,days:inputs[3].value});});
   const rxData={patient_name:patient,patient_mobile:mobile,diagnosis:diag,medicines:JSON.stringify(meds),medicines_count:meds.length,notes,follow_up_date:followup||null,doctor_name:currentUser.name,phc:currentUser.phc,dispensed:false};
-  const {error}=await db.from('prescriptions').insert(rxData);
+  const {data:rx,error}=await db.from('prescriptions').insert(rxData).select().single();
   if(error){showAlert('rxAlert','error','Error: '+error.message);return;}
+  await auditLog('CREATE_PRESCRIPTION','prescriptions',rx?.id,`Patient:${patient} Meds:${meds.length}`);
   if(mobile&&meds.length>0){
-    const medList=meds.map(m=>`• ${m.name} ${m.dosage} — ${m.timing} × ${m.days} days`).join('\n');
-    const msg=`🏥 *Virudhunagar PHC - Prescription*\n\nவணக்கம் ${patient}!\n\n📋 Diagnosis: ${diag||'As examined'}\n\n💊 Medicines:\n${medList}\n\n📅 Follow-up: ${followup||'As needed'}\n\n${currentUser.phc}`;
-    await sendWhatsApp(mobile,msg);
+    const medList=meds.map(m=>`• ${m.name} ${m.dosage} — ${m.timing} × ${m.days}d`).join('\n');
+    await sendWhatsApp(mobile,`🏥 *${currentUser.phc}*\n\nவணக்கம் ${patient}!\n\n📋 Diagnosis: ${diag}\n💊 Medicines:\n${medList}\n📅 Follow-up: ${followup||'As needed'}\n\n${currentUser.phc}`);
   }
-  showAlert('rxAlert','success',sendToPharmacy?`✅ Prescription saved & sent to Pharmacy! (${meds.length} medicines)`:`✅ Prescription saved! (${meds.length} medicines)`);
-  setTimeout(()=>loadPrescription(),2500);
+  showAlert('rxAlert','success',`✅ Prescription saved! (${meds.length} medicines)${sendToPharm?' → Sent to Pharmacy':''}`);
+  setTimeout(()=>loadPrescription(),2000);
 }
 
-// ── PHARMACY ──
+// ══════════════════════════════════════════
+// PHARMACY / DISPENSE
+// ══════════════════════════════════════════
 async function loadPharmacy(){
   const c=document.getElementById('mainContent');
-  c.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
-  const {data:rxList}=await db.from('prescriptions').select('*').eq('phc',currentUser.phc).eq('dispensed',false).order('created_at',{ascending:true});
+  c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const {data:pending}=await db.from('prescriptions').select('*').eq('phc',currentUser.phc).eq('dispensed',false).order('created_at',{ascending:true});
   const {data:dispensed}=await db.from('prescriptions').select('*').eq('phc',currentUser.phc).eq('dispensed',true).order('created_at',{ascending:false}).limit(10);
   c.innerHTML=`
   <div class="stats-grid">
-    <div class="stat-card"><div class="stat-icon orange">⏳</div><div class="stat-info"><div class="value">${(rxList||[]).length}</div><div class="label">Pending Dispense</div></div></div>
-    <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><div class="value">${(dispensed||[]).length}</div><div class="label">Dispensed Today</div></div></div>
+    <div class="stat-card"><div class="stat-icon orange">⏳</div><div class="stat-info"><div class="value">${(pending||[]).length}</div><div class="label">Pending</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><div class="value">${(dispensed||[]).length}</div><div class="label">Dispensed</div></div></div>
   </div>
-  <div class="section-card" style="margin-bottom:20px;">
+  <div class="section-card" style="margin-bottom:18px;">
     <div class="section-header"><h3>⏳ Pending Prescriptions</h3><button class="btn btn-outline btn-sm" onclick="loadPharmacy()">🔄</button></div>
     <div class="section-body">
-      ${(rxList||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">No pending prescriptions.</p>':
-      (rxList||[]).map(rx=>{
+      ${(pending||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">No pending prescriptions ✅</p>':
+      (pending||[]).map(rx=>{
         let meds=[];try{meds=JSON.parse(rx.medicines||'[]');}catch(e){}
-        return`<div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;background:white;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-            <div><div style="font-size:15px;font-weight:700;">${rx.patient_name}</div>
-            <div style="font-size:12px;color:var(--text-light);">Dr. ${rx.doctor_name} · ${rx.created_at?.slice(0,16)||''}</div>
-            <div style="font-size:13px;color:var(--primary);margin-top:4px;">Diagnosis: ${rx.diagnosis||'-'}</div></div>
+        return`<div style="border:1px solid var(--border);border-radius:9px;padding:13px;margin-bottom:11px;background:white;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;">
+            <div>
+              <div style="font-size:14px;font-weight:700;">${rx.patient_name} <span style="font-size:11px;color:var(--text-light);">${rx.patient_token||''}</span></div>
+              <div style="font-size:11px;color:var(--text-light);">Dr. ${rx.doctor_name} · ${rx.created_at?.slice(0,16)||''}</div>
+              <div style="font-size:12px;color:var(--primary);margin-top:3px;">Dx: ${rx.diagnosis||'-'}</div>
+            </div>
             <button class="btn btn-success btn-sm" onclick="dispensePrescription('${rx.id}','${rx.patient_name}','${rx.patient_mobile||''}',this)">✅ Dispense</button>
           </div>
-          <div style="background:var(--bg);border-radius:8px;padding:10px;">
-            <div style="font-size:12px;font-weight:600;color:var(--text-light);margin-bottom:6px;">MEDICINES (${meds.length}):</div>
-            ${meds.map(m=>`<div style="font-size:13px;padding:3px 0;border-bottom:1px solid var(--border);">💊 <strong>${m.name}</strong> ${m.dosage} — ${m.timing} × ${m.days} days</div>`).join('')}
+          <div style="background:var(--bg);border-radius:7px;padding:9px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text-light);margin-bottom:5px;">MEDICINES (${meds.length}):</div>
+            ${meds.map(m=>`<div style="font-size:12px;padding:2px 0;border-bottom:1px solid var(--border);">💊 <strong>${m.name}</strong> ${m.dosage} — ${m.timing} × ${m.days}d</div>`).join('')}
           </div>
-          ${rx.notes?`<div style="font-size:12px;color:var(--text-light);margin-top:8px;">📝 ${rx.notes}</div>`:''}
+          ${rx.notes?`<div style="font-size:11px;color:var(--text-light);margin-top:7px;">📝 ${rx.notes}</div>`:''}
         </div>`;
       }).join('')}
     </div>
   </div>
   <div class="section-card">
     <div class="section-header"><h3>✅ Recently Dispensed</h3></div>
-    <div class="section-body">
-      <table><tr><th>Patient</th><th>Medicines</th><th>Doctor</th><th>Time</th></tr>
-      ${(dispensed||[]).map(rx=>`<tr><td><strong>${rx.patient_name}</strong></td><td>${rx.medicines_count||0} items</td><td>${rx.doctor_name}</td><td style="font-size:12px;">${rx.dispensed_at?.slice(11,16)||'-'}</td></tr>`).join()||'<tr><td colspan="4" style="text-align:center;color:var(--text-light)">None today</td></tr>'}
+    <div class="section-body" style="overflow-x:auto;">
+      <table><tr><th>Patient</th><th>Medicines</th><th>Doctor</th><th>Dispensed By</th><th>Time</th></tr>
+      ${(dispensed||[]).map(rx=>`<tr><td><strong>${rx.patient_name}</strong></td><td>${rx.medicines_count||0} items</td><td>${rx.doctor_name}</td><td>${rx.dispensed_by||'-'}</td><td style="font-size:11px;">${rx.dispensed_at?.slice(11,16)||'-'}</td></tr>`).join()||'<tr><td colspan="5" style="text-align:center;color:var(--text-light)">None</td></tr>'}
       </table>
     </div>
   </div>`;
 }
 
-async function dispensePrescription(rxId,patientName,mobile,btn){
+async function dispensePrescription(rxId,patName,mobile,btn){
   btn.disabled=true;btn.textContent='Processing...';
   const {data:rx}=await db.from('prescriptions').select('*').eq('id',rxId).single();
   let meds=[];try{meds=JSON.parse(rx?.medicines||'[]');}catch(e){}
+  let stockWarn=[];
   for(const med of meds){
     const {data:stock}=await db.from('medicine').select('*').eq('phc',currentUser.phc).ilike('name',`%${med.name}%`).single();
-    if(stock&&stock.stock>0)await db.from('medicine').update({stock:Math.max(0,stock.stock-(parseInt(med.days)||1))}).eq('id',stock.id);
+    if(stock){
+      const needed=parseInt(med.days)||1;
+      if(stock.stock<needed){stockWarn.push(`${med.name}: need ${needed}, have ${stock.stock}`);continue;}
+      const newStock=stock.stock-needed;
+      await db.from('medicine').update({stock:newStock}).eq('id',stock.id);
+      await db.from('stock_transactions').insert({medicine_id:stock.id,medicine_name:med.name,phc:currentUser.phc,transaction_type:'out',quantity:needed,prescription_id:rxId,patient_name:patName,done_by:currentUser.name,notes:`Dispensed for ${patName}`});
+      await auditLog('DISPENSE_MEDICINE','medicine',stock.id,`${med.name} x${needed} → ${patName}`);
+    }
   }
+  if(stockWarn.length>0){alert('⚠️ Low stock warning:\n'+stockWarn.join('\n'));}
   await db.from('prescriptions').update({dispensed:true,dispensed_at:new Date().toISOString(),dispensed_by:currentUser.name}).eq('id',rxId);
-  if(mobile){const msg=`🏥 *Virudhunagar PHC - Medicines Ready*\n\nவணக்கம் ${patientName}!\n\n✅ உங்கள் medicines ready.\nPharmacy counter-ல் வந்து எடுத்துக்கொள்ளுங்கள்.\n\n${currentUser.phc}`;await sendWhatsApp(mobile,msg);}
+  await auditLog('DISPENSE_PRESCRIPTION','prescriptions',rxId,`Dispensed to ${patName} by ${currentUser.name}`);
+  if(mobile){await sendWhatsApp(mobile,`🏥 *${currentUser.phc}*\n\nவணக்கம் ${patName}!\n\n✅ உங்கள் medicines ready.\nPharmacy counter-ல் வந்து எடுத்துக்கொள்ளுங்கள்.\n\n${currentUser.phc}`);}
   btn.textContent='✅ Done!';
-  setTimeout(()=>loadPharmacy(),1500);
+  setTimeout(()=>loadPharmacy(),1200);
 }
 
-// ── VACCINATION ──
-const VACCINE_SCHEDULE=[
-  {name:'BCG',age:'At birth',dose:'0.1ml ID',disease:'Tuberculosis'},
-  {name:'OPV 0',age:'At birth',dose:'2 drops oral',disease:'Polio'},
-  {name:'Hepatitis B',age:'At birth',dose:'0.5ml IM',disease:'Hepatitis B'},
-  {name:'OPV 1 + IPV 1',age:'6 weeks',dose:'Standard',disease:'Polio'},
-  {name:'Pentavalent 1',age:'6 weeks',dose:'0.5ml IM',disease:'DPT+HepB+Hib'},
-  {name:'PCV 1',age:'6 weeks',dose:'0.5ml IM',disease:'Pneumonia'},
-  {name:'OPV 2 + Pentavalent 2',age:'10 weeks',dose:'Standard',disease:'Polio+DPT'},
-  {name:'OPV 3 + Pentavalent 3',age:'14 weeks',dose:'Standard',disease:'Polio+DPT'},
-  {name:'PCV 2',age:'14 weeks',dose:'0.5ml IM',disease:'Pneumonia'},
-  {name:'Measles / MR 1',age:'9 months',dose:'0.5ml SC',disease:'Measles+Rubella'},
-  {name:'JE 1',age:'9 months',dose:'0.5ml SC',disease:'Japanese Encephalitis'},
-  {name:'Vitamin A (1st dose)',age:'9 months',dose:'1 lakh IU',disease:'Deficiency'},
-  {name:'DPT Booster 1',age:'16-24 months',dose:'Standard',disease:'DPT+Polio'},
-  {name:'Measles / MR 2',age:'16-24 months',dose:'0.5ml SC',disease:'Measles+Rubella'},
-  {name:'TT (Pregnant Women)',age:'Pregnancy',dose:'0.5ml IM',disease:'Tetanus'},
-];
-
-async function loadVaccination(){
+// ══════════════════════════════════════════
+// MEDICINE STOCK
+// ══════════════════════════════════════════
+async function loadMedicine(){
   const c=document.getElementById('mainContent');
-  c.innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
-  const {data:pregList}=await db.from('pregnancy').select('*').eq('phc',currentUser.phc).eq('status','active');
+  c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const phcFilter=(['district_admin','ddhs'].includes(currentUser.role))?null:currentUser.phc;
+  let query=db.from('medicine').select('*').order('name');
+  if(phcFilter)query=query.eq('phc',phcFilter);
+  const {data}=await query;
+  const low=(data||[]).filter(m=>m.stock<=(m.min_level||10));
   c.innerHTML=`
-  <div class="section-card" style="margin-bottom:20px;">
-    <div class="section-header"><h3>💉 National Immunisation Schedule</h3><button class="btn btn-whatsapp btn-sm" onclick="sendVaccineReminders()">📱 Send All Reminders</button></div>
+  ${low.length>0?`<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:9px;padding:12px;margin-bottom:16px;font-size:12px;color:#856404;">⚠️ <strong>${low.length} medicines</strong> low/critical: ${low.map(m=>m.name).join(', ')}</div>`:''}
+  <div class="section-card">
+    <div class="section-header"><h3>💊 Medicine Stock — ${phcFilter||'All PHCs'}</h3>
+      ${currentUser.role==='pharmacist'||currentUser.role==='phc_admin'?`<button class="btn btn-success btn-sm" onclick="document.getElementById('stockModal').classList.add('open')">+ Add Stock</button>`:''}
+    </div>
     <div class="section-body" style="overflow-x:auto;">
-      <table><tr><th>Vaccine</th><th>Age / Time</th><th>Dose</th><th>Disease Protected</th></tr>
-      ${VACCINE_SCHEDULE.map(v=>`<tr><td><strong>${v.name}</strong></td><td><span class="badge badge-active">${v.age}</span></td><td style="font-size:12px;">${v.dose}</td><td style="font-size:12px;color:var(--text-light);">${v.disease}</td></tr>`).join('')}
+      <table><tr><th>Medicine</th><th>Category</th><th>Batch</th><th>Stock</th><th>Min</th><th>Expiry</th><th>PHC</th><th>Status</th></tr>
+      ${(data||[]).map(m=>{
+        const badge=m.stock<=(m.min_level||10)/2?'badge-critical':m.stock<=(m.min_level||10)?'badge-low':'badge-ok';
+        const label=m.stock<=(m.min_level||10)/2?'Critical':m.stock<=(m.min_level||10)?'Low':'OK';
+        return`<tr><td><strong>${m.name}</strong></td><td>${m.category||'-'}</td><td style="font-size:11px;">${m.batch_number||'-'}</td><td><strong>${m.stock}</strong></td><td>${m.min_level||10}</td><td style="font-size:11px;">${m.expiry_date||'-'}</td><td style="font-size:11px;">${m.phc||'-'}</td><td><span class="badge ${badge}">${label}</span></td></tr>`;
+      }).join()||'<tr><td colspan="8" style="text-align:center;color:var(--text-light)">No stock data</td></tr>'}
       </table>
     </div>
+  </div>`;
+}
+
+async function saveStock(){
+  const name=document.getElementById('sm_name').value.trim();
+  const qty=parseInt(document.getElementById('sm_qty').value)||0;
+  const min=parseInt(document.getElementById('sm_min').value)||10;
+  const cat=document.getElementById('sm_cat').value;
+  const batch=document.getElementById('sm_batch').value.trim();
+  const expiry=document.getElementById('sm_expiry').value;
+  if(!name||!qty){showAlert('stockAlert','error','Name and quantity required!');return;}
+  const {data:existing}=await db.from('medicine').select('*').eq('phc',currentUser.phc).ilike('name',name).single();
+  if(existing){
+    const newQty=existing.stock+qty;
+    await db.from('medicine').update({stock:newQty,batch_number:batch||existing.batch_number,expiry_date:expiry||existing.expiry_date}).eq('id',existing.id);
+    await db.from('stock_transactions').insert({medicine_id:existing.id,medicine_name:name,phc:currentUser.phc,transaction_type:'in',quantity:qty,done_by:currentUser.name,notes:`Stock added: ${qty} units`});
+  }else{
+    const {data:newMed}=await db.from('medicine').insert({name,category:cat,stock:qty,min_level:min,batch_number:batch,expiry_date:expiry,phc:currentUser.phc}).select().single();
+    if(newMed)await db.from('stock_transactions').insert({medicine_id:newMed.id,medicine_name:name,phc:currentUser.phc,transaction_type:'in',quantity:qty,done_by:currentUser.name,notes:'Initial stock entry'});
+  }
+  await auditLog('ADD_STOCK','medicine','',`${name} x${qty} added by ${currentUser.name}`);
+  showAlert('stockAlert','success',`✅ Stock updated! ${name} +${qty} units`);
+  setTimeout(()=>{closeModal('stockModal');loadMedicine();},1500);
+}
+
+// ══════════════════════════════════════════
+// STOCK TRANSACTION HISTORY
+// ══════════════════════════════════════════
+async function loadStockTxn(){
+  const c=document.getElementById('mainContent');
+  c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const {data}=await db.from('stock_transactions').select('*').eq('phc',currentUser.phc).order('created_at',{ascending:false}).limit(50);
+  c.innerHTML=`<div class="section-card">
+    <div class="section-header"><h3>📜 Stock Transaction History</h3></div>
+    <div class="section-body" style="overflow-x:auto;">
+      <table><tr><th>Date/Time</th><th>Medicine</th><th>Type</th><th>Qty</th><th>Patient</th><th>Done By</th><th>Notes</th></tr>
+      ${(data||[]).map(t=>`<tr>
+        <td style="font-size:11px;">${t.created_at?.slice(0,16)||'-'}</td>
+        <td><strong>${t.medicine_name}</strong></td>
+        <td><span class="badge ${t.transaction_type==='in'?'badge-active':'badge-info'}">${t.transaction_type==='in'?'📦 IN':'💊 OUT'}</span></td>
+        <td style="font-weight:700;color:${t.transaction_type==='in'?'var(--success)':'var(--danger)'};">${t.transaction_type==='in'?'+':'−'}${t.quantity}</td>
+        <td style="font-size:11px;">${t.patient_name||'-'}</td>
+        <td style="font-size:11px;">${t.done_by||'-'}</td>
+        <td style="font-size:11px;">${t.notes||'-'}</td>
+      </tr>`).join()||'<tr><td colspan="7" style="text-align:center;color:var(--text-light)">No transactions</td></tr>'}
+      </table>
+    </div>
+  </div>`;
+}
+// ══════════════════════════════════════════
+// PREGNANCY
+// ══════════════════════════════════════════
+async function loadPregnancy(){
+  const c=document.getElementById('mainContent');
+  c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const phcFilter=['district_admin','ddhs'].includes(currentUser.role)?null:currentUser.phc;
+  let q=db.from('pregnancy').select('*').order('created_at',{ascending:false});
+  if(phcFilter)q=q.eq('phc',phcFilter);
+  const {data}=await q;
+  const active=(data||[]).filter(p=>p.status==='active');
+  const highRisk=(data||[]).filter(p=>p.high_risk==='Yes');
+  c.innerHTML=`
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon purple">🤰</div><div class="stat-info"><div class="value">${active.length}</div><div class="label">Active</div></div></div>
+    <div class="stat-card"><div class="stat-icon red">⚠️</div><div class="stat-info"><div class="value">${highRisk.length}</div><div class="label">High Risk</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><div class="value">${(data||[]).length-active.length}</div><div class="label">Delivered</div></div></div>
   </div>
   <div class="section-card">
-    <div class="section-header"><h3>🤰 Send Vaccination Reminders</h3></div>
+    <div class="section-header"><h3>🤰 Pregnancy Cases</h3>
+      <div style="display:flex;gap:7px;">
+        <button class="btn btn-whatsapp btn-sm" onclick="sendMonthlyReminders()">📱 Reminders</button>
+        <button class="btn btn-success btn-sm" onclick="document.getElementById('pregModal').classList.add('open')">+ Register</button>
+      </div>
+    </div>
     <div class="section-body">
-      ${(pregList||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">No active pregnancy cases.</p>':
-      (pregList||[]).map(p=>{
+      ${(data||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">No cases registered.</p>':
+      (data||[]).map(p=>{
         const weeks=Math.floor((Date.now()-new Date(p.lmp_date))/(7*24*60*60*1000));
-        return`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
-          <div><strong>${p.name}</strong><div style="font-size:12px;color:var(--text-light);">Week ${weeks} · ${p.mobile||'No mobile'} · ${p.unique_id}</div></div>
-          ${p.mobile?`<button class="btn btn-whatsapp btn-sm" onclick="sendVaccineAlert('${p.mobile}','${p.name}',${weeks})">💉 Send Alert</button>`:'<span style="font-size:12px;color:var(--text-light);">No mobile</span>'}
+        const pct=Math.min(Math.round(weeks/40*100),100);
+        return`<div class="preg-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div><div style="font-weight:700;color:var(--primary);font-size:13px;">${p.unique_id}</div>
+            <div style="font-size:14px;font-weight:600;">${p.name}</div>
+            <div style="font-size:11px;color:var(--text-light);">${p.age}y · 📱${p.mobile||'No mobile'} · ${p.blood_group} · ${p.phc||''}</div></div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+              <span class="badge ${p.high_risk==='Yes'?'badge-critical':'badge-active'}">${p.high_risk==='Yes'?'High Risk':'Normal'}</span>
+              ${p.mobile?`<button class="btn btn-whatsapp btn-sm" onclick="sendPregReminder('${p.mobile}','${p.name}','${p.unique_id}',${weeks},'${p.edd}')">📱</button>`:''}
+            </div>
+          </div>
+          <div style="display:flex;gap:7px;margin:7px 0;flex-wrap:wrap;">
+            <span style="background:var(--bg);padding:2px 7px;border-radius:5px;font-size:10px;">Week ${weeks}</span>
+            <span style="background:var(--bg);padding:2px 7px;border-radius:5px;font-size:10px;">EDD: ${p.edd}</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
         </div>`;
       }).join('')}
     </div>
   </div>`;
 }
 
-async function sendVaccineAlert(mobile,name,weeks){
-  let vaccines=weeks<6?['TT 1st dose']:weeks<14?['TT 2nd dose','IFA tablets']:['TT Booster','IFA + Calcium tablets'];
-  const msg=`🏥 *Virudhunagar PHC - Vaccination Reminder*\n\nவணக்கம் ${name}!\n\n💉 தாய் சேய் நல திட்டம்\n\nதேவையான vaccines:\n${vaccines.map(v=>'• '+v).join('\n')}\n\nPHC-ல் வாருங்கள்.\n\n${currentUser.phc}`;
+async function sendPregReminder(mobile,name,uid,weeks,edd){
+  const msg=`🏥 *${currentUser?.phc||'Virudhunagar PHC'} - Pregnancy Reminder*\n\nவணக்கம் ${name}!\n\nID: *${uid}*\nவாரம்: *${weeks} weeks*\nEDD: *${edd}*\n\n📅 மாதாந்திர checkup-க்கு வாருங்கள்.\n\n${currentUser?.phc}`;
   const ok=await sendWhatsApp(mobile,msg);
-  alert(ok?`✅ Vaccine reminder sent to ${name}!`:`❌ Failed to send to ${name}`);
+  alert(ok?`✅ Sent to ${name}!`:`❌ Failed`);
+}
+
+async function sendMonthlyReminders(){
+  const phcFilter=['district_admin','ddhs'].includes(currentUser.role)?null:currentUser.phc;
+  let q=db.from('pregnancy').select('*').eq('status','active');
+  if(phcFilter)q=q.eq('phc',phcFilter);
+  const {data}=await q;
+  if(!data||data.length===0){alert('No active cases');return;}
+  let sent=0;
+  for(const p of data){if(p.mobile){const weeks=Math.floor((Date.now()-new Date(p.lmp_date))/(7*24*60*60*1000));await sendPregReminder(p.mobile,p.name,p.unique_id,weeks,p.edd);sent++;}}
+  alert(`✅ Reminders sent to ${sent} patients!`);
+}
+
+async function registerPregnancy(){
+  const name=document.getElementById('pm_name').value.trim();
+  const age=document.getElementById('pm_age').value;
+  const mobile=document.getElementById('pm_mobile').value.trim();
+  const blood=document.getElementById('pm_blood').value;
+  const address=document.getElementById('pm_address').value.trim();
+  const lmp=document.getElementById('pm_lmp').value;
+  const risk=document.getElementById('pm_risk').value;
+  if(!name||!age||!lmp){showAlert('pregAlert','error','Name, Age, LMP required!');return;}
+  const year=new Date().getFullYear();
+  const {count}=await db.from('pregnancy').select('id',{count:'exact'});
+  const uid=`VRD-P-${year}-${String((count||0)+1).padStart(3,'0')}`;
+  const lmpDate=new Date(lmp);
+  const edd=new Date(lmpDate.getTime()+280*24*60*60*1000).toISOString().slice(0,10);
+  const weeks=Math.floor((Date.now()-lmpDate)/(7*24*60*60*1000));
+  const {error}=await db.from('pregnancy').insert({unique_id:uid,name,age:parseInt(age),mobile,address,blood_group:blood,lmp_date:lmp,edd,weeks,high_risk:risk,hospital:currentUser.phc,status:'active',phc:currentUser.phc});
+  if(error){showAlert('pregAlert','error','Error: '+error.message);return;}
+  if(mobile){await sendWhatsApp(mobile,`🏥 *${currentUser.phc}*\n\nவணக்கம் ${name}!\n\n🆔 ID: ${uid}\n📅 EDD: ${edd}\n🩺 Blood: ${blood}\n\nஒவ்வொரு மாதமும் checkup வாருங்கள்.\n\n${currentUser.phc}`);}
+  await auditLog('REGISTER_PREGNANCY','pregnancy','',`${name} ID:${uid} PHC:${currentUser.phc}`);
+  showAlert('pregAlert','success',`✅ Registered! ID: ${uid}`);
+  setTimeout(()=>{closeModal('pregModal');loadPregnancy();},2000);
+}
+
+// ══════════════════════════════════════════
+// VACCINATION
+// ══════════════════════════════════════════
+const VACCINES=[{name:'BCG',age:'At birth',disease:'TB'},{name:'OPV 0',age:'At birth',disease:'Polio'},{name:'Hepatitis B',age:'At birth',disease:'Hep B'},{name:'Pentavalent 1',age:'6 weeks',disease:'DPT+HepB+Hib'},{name:'PCV 1',age:'6 weeks',disease:'Pneumonia'},{name:'OPV 1+IPV 1',age:'6 weeks',disease:'Polio'},{name:'Pentavalent 2',age:'10 weeks',disease:'DPT+HepB+Hib'},{name:'OPV 2',age:'10 weeks',disease:'Polio'},{name:'Pentavalent 3',age:'14 weeks',disease:'DPT+HepB+Hib'},{name:'OPV 3+IPV 2',age:'14 weeks',disease:'Polio'},{name:'PCV 2',age:'14 weeks',disease:'Pneumonia'},{name:'MR 1',age:'9 months',disease:'Measles+Rubella'},{name:'JE 1',age:'9 months',disease:'Encephalitis'},{name:'Vitamin A',age:'9 months',disease:'Deficiency'},{name:'DPT Booster',age:'16-24 months',disease:'DPT+Polio'},{name:'MR 2',age:'16-24 months',disease:'Measles+Rubella'},{name:'TT',age:'Pregnancy',disease:'Tetanus'}];
+
+async function loadVaccination(){
+  const c=document.getElementById('mainContent');
+  const phcFilter=['district_admin','ddhs'].includes(currentUser.role)?null:currentUser.phc;
+  let q=db.from('pregnancy').select('*').eq('status','active');
+  if(phcFilter)q=q.eq('phc',phcFilter);
+  const {data:pregList}=await q;
+  c.innerHTML=`
+  <div class="section-card" style="margin-bottom:18px;">
+    <div class="section-header"><h3>💉 National Immunisation Schedule</h3><button class="btn btn-whatsapp btn-sm" onclick="sendVaccineReminders()">📱 Send All</button></div>
+    <div class="section-body" style="overflow-x:auto;">
+      <table><tr><th>Vaccine</th><th>Age</th><th>Disease</th></tr>
+      ${VACCINES.map(v=>`<tr><td><strong>${v.name}</strong></td><td><span class="badge badge-active">${v.age}</span></td><td style="font-size:11px;color:var(--text-light);">${v.disease}</td></tr>`).join('')}
+      </table>
+    </div>
+  </div>
+  <div class="section-card">
+    <div class="section-header"><h3>🤰 Vaccination Reminders</h3></div>
+    <div class="section-body">
+      ${(pregList||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">No active cases.</p>':
+      (pregList||[]).map(p=>{const weeks=Math.floor((Date.now()-new Date(p.lmp_date))/(7*24*60*60*1000));return`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);">
+        <div><strong>${p.name}</strong><div style="font-size:11px;color:var(--text-light);">Week ${weeks} · ${p.mobile||'No mobile'}</div></div>
+        ${p.mobile?`<button class="btn btn-whatsapp btn-sm" onclick="sendVaccineAlert('${p.mobile}','${p.name}',${weeks})">💉 Alert</button>`:''}
+      </div>`;}).join('')}
+    </div>
+  </div>`;
+}
+
+async function sendVaccineAlert(mobile,name,weeks){
+  const v=weeks<6?['TT 1st dose']:weeks<14?['TT 2nd dose','IFA']:['TT Booster','IFA+Calcium'];
+  const msg=`🏥 *${currentUser?.phc} - Vaccine Reminder*\n\nவணக்கம் ${name}!\n\n💉 Vaccines due:\n${v.map(x=>'• '+x).join('\n')}\n\nPHC-ல் வாருங்கள்.\n\n${currentUser?.phc}`;
+  const ok=await sendWhatsApp(mobile,msg);
+  alert(ok?`✅ Sent to ${name}!`:`❌ Failed`);
 }
 
 async function sendVaccineReminders(){
-  const {data}=await db.from('pregnancy').select('*').eq('phc',currentUser.phc).eq('status','active');
+  const phcFilter=['district_admin','ddhs'].includes(currentUser.role)?null:currentUser.phc;
+  let q=db.from('pregnancy').select('*').eq('status','active');
+  if(phcFilter)q=q.eq('phc',phcFilter);
+  const {data}=await q;
   if(!data||data.length===0){alert('No active cases');return;}
-  let sent=0;
-  for(const p of data){if(p.mobile){const weeks=Math.floor((Date.now()-new Date(p.lmp_date))/(7*24*60*60*1000));await sendVaccineAlert(p.mobile,p.name,weeks);sent++;}}
-  alert(`✅ Vaccination reminders sent to ${sent} patients!`);
+  let sent=0;for(const p of data){if(p.mobile){const weeks=Math.floor((Date.now()-new Date(p.lmp_date))/(7*24*60*60*1000));await sendVaccineAlert(p.mobile,p.name,weeks);sent++;}}
+  alert(`✅ Sent to ${sent} patients!`);
 }
 
-// ── PATIENT HISTORY ──
+// ══════════════════════════════════════════
+// ATTENDANCE
+// ══════════════════════════════════════════
+async function loadAttendance(){
+  const c=document.getElementById('mainContent');
+  c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const today=new Date().toISOString().slice(0,10);
+  const phcFilter=['district_admin','ddhs'].includes(currentUser.role)?null:currentUser.phc;
+  let q=db.from('attendance').select('*').order('created_at',{ascending:false}).limit(50);
+  if(phcFilter)q=q.eq('phc',phcFilter);
+  const {data}=await q;
+  const todayRec=(data||[]).find(a=>a.date===today&&a.user_name===currentUser.name);
+  function locBadge(a){
+    if(!a)return'';
+    if(a.status==='within_phc'||a.status==='present')return`<span class="badge badge-active">📍 Within PHC${a.distance_from_phc!=null?' · '+a.distance_from_phc+'m':''}</span>`;
+    if(a.status==='outside_phc')return`<span class="badge badge-critical">⚠️ Outside · ${a.distance_from_phc||'?'}m</span>`;
+    return`<span class="badge badge-waiting">📵 No GPS</span>`;
+  }
+  c.innerHTML=`
+  <div class="section-card" style="margin-bottom:18px;">
+    <div class="section-header"><h3>📅 My Attendance Today</h3></div>
+    <div class="section-body">
+      ${todayRec?`<div style="background:#d4edda;border-radius:9px;padding:12px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">✅</span>
+        <div><strong>${currentUser.name}</strong>
+        <div style="font-size:12px;color:#155724;">Checked in at ${todayRec.check_in}</div>
+        <div style="margin-top:5px;">${locBadge(todayRec)}</div></div>
+      </div>`:`<div style="background:#fff3cd;border-radius:9px;padding:12px;">
+        <strong>${currentUser.name}</strong>
+        <div style="font-size:12px;color:#856404;">Not checked in today (login marks attendance)</div>
+      </div>`}
+    </div>
+  </div>
+  <div class="section-card">
+    <div class="section-header"><h3>📋 Attendance Log${phcFilter?' — '+phcFilter:' — All PHCs'}</h3></div>
+    <div class="section-body" style="overflow-x:auto;">
+      <table><tr><th>Name</th><th>Role</th><th>PHC</th><th>Date</th><th>Check-in</th><th>Location</th><th>Map</th></tr>
+      ${(data||[]).map(a=>`<tr>
+        <td><strong>${a.user_name}</strong></td>
+        <td><span class="role-badge role-${a.role}">${a.role}</span></td>
+        <td style="font-size:11px;">${a.phc||'-'}</td>
+        <td style="font-size:11px;">${a.date||'-'}</td>
+        <td>${a.check_in||'-'}</td>
+        <td>${locBadge(a)}</td>
+        <td>${a.latitude?`<a href="https://www.google.com/maps?q=${a.latitude},${a.longitude}" target="_blank" style="color:var(--primary);font-size:11px;">🗺 Map</a>`:'-'}</td>
+      </tr>`).join()||'<tr><td colspan="7" style="text-align:center;color:var(--text-light)">No records</td></tr>'}
+      </table>
+    </div>
+  </div>`;
+}
+// ══════════════════════════════════════════
+// DISTRICT VIEWS
+// ══════════════════════════════════════════
+async function loadAllPHCs(){
+  const c=document.getElementById('mainContent');
+  const stats=await Promise.all(PHC_LIST.map(async phc=>{
+    const [{count:pat},{count:preg},{count:att}]=await Promise.all([
+      db.from('patients').select('id',{count:'exact'}).eq('phc',phc),
+      db.from('pregnancy').select('id',{count:'exact'}).eq('phc',phc).eq('status','active'),
+      db.from('attendance').select('id',{count:'exact'}).eq('phc',phc).eq('date',new Date().toISOString().slice(0,10)),
+    ]);
+    return{phc,pat:pat||0,preg:preg||0,att:att||0};
+  }));
+  c.innerHTML=`<div class="section-card">
+    <div class="section-header"><h3>🏥 All PHCs — Virudhunagar District</h3></div>
+    <div class="section-body" style="overflow-x:auto;">
+      <table><tr><th>PHC Name</th><th>Today Patients</th><th>Active Pregnancy</th><th>Staff Present</th><th>Status</th></tr>
+      ${stats.map(s=>`<tr><td><strong>${s.phc}</strong></td><td>${s.pat}</td><td>${s.preg}</td><td>${s.att}</td><td><span class="badge badge-active">Active</span></td></tr>`).join('')}
+      </table>
+    </div>
+  </div>`;
+}
+
+async function loadAllPatients(){
+  const c=document.getElementById('mainContent');
+  c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const {data}=await db.from('patients').select('*').order('created_at',{ascending:false}).limit(100);
+  const cutoff=new Date(Date.now()-90*24*60*60*1000).toISOString();
+  const {data:lost}=await db.from('patients').select('*').lt('created_at',cutoff).eq('status','done').not('mobile','is',null).limit(10);
+  c.innerHTML=`
+  ${(lost||[]).length>0?`<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:9px;padding:12px;margin-bottom:16px;">
+    <div style="font-weight:700;color:#856404;margin-bottom:7px;">⚠️ ${(lost||[]).length} patients not visited in 3+ months</div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;">
+      ${(lost||[]).slice(0,5).map(p=>p.mobile?`<button class="btn btn-warning btn-sm" onclick="send3MonthAlert('${p.mobile}','${p.name}')">📱 ${p.name}</button>`:'').join('')}
+      <button class="btn btn-outline btn-sm" onclick="sendAll3MonthAlerts()">Send All</button>
+    </div>
+  </div>`:''}
+  <div class="section-card">
+    <div class="section-header"><h3>👥 All Patients — District</h3><div style="font-size:12px;color:var(--text-light);">Total: ${(data||[]).length}</div></div>
+    <div class="section-body" style="overflow-x:auto;">
+      <table><tr><th>Token</th><th>Name</th><th>Age</th><th>Disease</th><th>PHC</th><th>Date</th><th>Wait</th><th>Status</th><th>Print</th></tr>
+      ${(data||[]).map(p=>`<tr>
+        <td><strong>T-${String(p.token_number).padStart(3,'0')}</strong></td>
+        <td>${p.name}</td><td>${p.age}</td><td style="font-size:11px;">${p.disease||'-'}</td>
+        <td style="font-size:11px;">${p.phc||'-'}</td>
+        <td style="font-size:11px;">${p.registration_date||p.created_at?.slice(0,10)||'-'}</td>
+        <td style="font-size:11px;">${p.waiting_minutes!=null?p.waiting_minutes+'m':'-'}</td>
+        <td><span class="badge badge-${p.status}">${p.status}</span></td>
+        <td><button class="btn btn-print btn-sm" onclick='showTokenPrint(${JSON.stringify(p).replace(/'/g,"&#39;")},${p.token_number})'>🖨️</button></td>
+      </tr>`).join()||'<tr><td colspan="9" style="text-align:center;color:var(--text-light)">No data</td></tr>'}
+      </table>
+    </div>
+  </div>`;
+}
+
+async function loadAllStaff(){
+  const c=document.getElementById('mainContent');
+  c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const {data}=await db.from('users').select('*').order('phc').order('role');
+  c.innerHTML=`<div class="section-card">
+    <div class="section-header"><h3>👤 All Staff — District</h3></div>
+    <div class="section-body" style="overflow-x:auto;">
+      <table><tr><th>Name</th><th>Role</th><th>PHC</th><th>Email</th></tr>
+      ${(data||[]).map(u=>`<tr>
+        <td><strong>${u.name}</strong></td>
+        <td><span class="role-badge role-${u.role}">${ROLE_LABELS[u.role]||u.role}</span></td>
+        <td style="font-size:11px;">${u.phc||'-'}</td>
+        <td style="font-size:11px;">${u.email}</td>
+      </tr>`).join()||'<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No data</td></tr>'}
+      </table>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// REPORTS
+// ══════════════════════════════════════════
+async function loadReports(){
+  const c=document.getElementById('mainContent');
+  c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const isDistrict=['district_admin','ddhs'].includes(currentUser.role);
+  const phcList=isDistrict?PHC_LIST:[currentUser.phc];
+  const results=await Promise.all(phcList.map(async phc=>{
+    const [{count:totalPat},{count:preg},{data:compPat}]=await Promise.all([
+      db.from('patients').select('id',{count:'exact'}).eq('phc',phc),
+      db.from('pregnancy').select('id',{count:'exact'}).eq('phc',phc).eq('status','active'),
+      db.from('patients').select('waiting_minutes,consultation_minutes').eq('phc',phc).not('waiting_minutes','is',null).limit(100),
+    ]);
+    const avgWait=compPat&&compPat.length>0?Math.round(compPat.reduce((s,p)=>s+(p.waiting_minutes||0),0)/compPat.length):0;
+    const avgConsult=compPat&&compPat.length>0?Math.round(compPat.reduce((s,p)=>s+(p.consultation_minutes||0),0)/compPat.length):0;
+    return{phc,totalPat:totalPat||0,preg:preg||0,avgWait,avgConsult};
+  }));
+  c.innerHTML=`
+  <div class="section-card" style="margin-bottom:18px;">
+    <div class="section-header"><h3>📈 PHC Performance Report</h3></div>
+    <div class="section-body" style="overflow-x:auto;">
+      <table><tr><th>PHC</th><th>Total Patients</th><th>Active Pregnancy</th><th>Avg Wait Time</th><th>Avg Consult Time</th></tr>
+      ${results.map(r=>`<tr>
+        <td><strong>${r.phc}</strong></td>
+        <td>${r.totalPat}</td>
+        <td>${r.preg}</td>
+        <td><span class="badge ${r.avgWait>30?'badge-critical':r.avgWait>15?'badge-low':'badge-ok'}">${r.avgWait}m</span></td>
+        <td><span class="badge badge-info">${r.avgConsult}m</span></td>
+      </tr>`).join('')}
+      </table>
+    </div>
+  </div>
+  <div class="section-card">
+    <div class="section-header"><h3>📊 Summary</h3></div>
+    <div class="section-body">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon green">👥</div><div class="stat-info"><div class="value">${results.reduce((s,r)=>s+r.totalPat,0)}</div><div class="label">Total Patients</div></div></div>
+        <div class="stat-card"><div class="stat-icon purple">🤰</div><div class="stat-info"><div class="value">${results.reduce((s,r)=>s+r.preg,0)}</div><div class="label">Active Pregnancy</div></div></div>
+        <div class="stat-card"><div class="stat-icon orange">⏱️</div><div class="stat-info"><div class="value">${results.length>0?Math.round(results.reduce((s,r)=>s+r.avgWait,0)/results.length):0}m</div><div class="label">District Avg Wait</div></div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// AUDIT LOG
+// ══════════════════════════════════════════
+async function loadAudit(){
+  const c=document.getElementById('mainContent');
+  c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const {data}=await db.from('audit_log').select('*').order('created_at',{ascending:false}).limit(100);
+  c.innerHTML=`<div class="section-card">
+    <div class="section-header"><h3>📋 Audit Log</h3><div style="font-size:11px;color:var(--text-light);">Last 100 actions</div></div>
+    <div class="section-body" style="overflow-x:auto;">
+      <table><tr><th>Date/Time</th><th>Action</th><th>Done By</th><th>Role</th><th>PHC</th><th>Details</th></tr>
+      ${(data||[]).map(a=>`<tr>
+        <td style="font-size:11px;">${a.created_at?.slice(0,16)||'-'}</td>
+        <td><strong style="font-size:11px;">${a.action||'-'}</strong></td>
+        <td style="font-size:11px;">${a.done_by||'-'}</td>
+        <td><span class="role-badge role-${a.role}" style="font-size:9px;">${a.role||'-'}</span></td>
+        <td style="font-size:11px;">${a.phc||'-'}</td>
+        <td style="font-size:11px;color:var(--text-light);">${a.details||'-'}</td>
+      </tr>`).join()||'<tr><td colspan="6" style="text-align:center;color:var(--text-light)">No audit records</td></tr>'}
+      </table>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// PATIENT HISTORY (DOCTOR)
+// ══════════════════════════════════════════
 async function loadPatHistory(){
   const c=document.getElementById('mainContent');
-  c.innerHTML=`<div class="section-card"><div class="section-header"><h3>📂 Search Patient History</h3></div><div class="section-body">
-    <div style="display:flex;gap:10px;margin-bottom:16px;">
-      <input id="histSearch" placeholder="Enter patient name or mobile number..." style="flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none;">
-      <button class="btn btn-primary" style="width:auto;" onclick="searchPatientHistory()">🔍 Search</button>
+  c.innerHTML=`<div class="section-card"><div class="section-header"><h3>📂 Patient History Search</h3></div><div class="section-body">
+    <div style="display:flex;gap:9px;margin-bottom:14px;">
+      <input id="histSearch" placeholder="Name or mobile number..." style="flex:1;padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
+      <button class="btn btn-primary" style="width:auto;" onclick="searchHistory()">🔍 Search</button>
     </div>
-    <div id="histResults"><p style="color:var(--text-light);font-size:13px;">Enter name or mobile number to search.</p></div>
+    <div id="histResults"><p style="color:var(--text-light);font-size:13px;">Enter name or mobile to search.</p></div>
   </div></div>`;
 }
 
-async function searchPatientHistory(){
-  const q=document.getElementById('histSearch').value.trim();
-  if(!q)return;
+async function searchHistory(){
+  const q=document.getElementById('histSearch').value.trim();if(!q)return;
   const r=document.getElementById('histResults');
   r.innerHTML='<div class="loading"><div class="spinner"></div></div>';
-  const {data:patients}=await db.from('patients').select('*').eq('phc',currentUser.phc).or(`name.ilike.%${q}%,mobile.eq.${q}`).order('created_at',{ascending:false});
-  const {data:rxs}=await db.from('prescriptions').select('*').eq('phc',currentUser.phc).ilike('patient_name',`%${q}%`).order('created_at',{ascending:false});
-  if((!patients||patients.length===0)&&(!rxs||rxs.length===0)){r.innerHTML='<p style="color:var(--text-light);font-size:13px;">No records found.</p>';return;}
+  const [{data:visits},{data:rxs}]=await Promise.all([
+    db.from('patients').select('*').eq('phc',currentUser.phc).or(`name.ilike.%${q}%,mobile.eq.${q}`).order('created_at',{ascending:false}),
+    db.from('prescriptions').select('*').eq('phc',currentUser.phc).ilike('patient_name',`%${q}%`).order('created_at',{ascending:false}),
+  ]);
+  if((!visits||visits.length===0)&&(!rxs||rxs.length===0)){r.innerHTML='<p style="color:var(--text-light);font-size:13px;">No records found.</p>';return;}
   r.innerHTML=`
-  ${(patients||[]).length>0?`<div class="section-card" style="margin-bottom:16px;"><div class="section-header"><h3>👤 Visit History (${(patients||[]).length} visits)</h3></div><div class="section-body">
-    <table><tr><th>Date</th><th>Token</th><th>Disease</th><th>Doctor</th><th>Status</th></tr>
-    ${(patients||[]).map(p=>`<tr><td style="font-size:12px;">${p.created_at?.slice(0,10)||'-'}</td><td><strong>T-${String(p.token_number).padStart(3,'0')}</strong></td><td>${p.disease||'-'}</td><td style="font-size:12px;">${p.doctor||'-'}</td><td><span class="badge badge-${p.status}">${p.status}</span></td></tr>`).join('')}
-    </table></div></div>`:''}
-  ${(rxs||[]).length>0?`<div class="section-card"><div class="section-header"><h3>📝 Prescription History (${(rxs||[]).length})</h3></div><div class="section-body">
-    ${(rxs||[]).map(rx=>{let meds=[];try{meds=JSON.parse(rx.medicines||'[]')}catch(e){}return`<div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;"><div style="font-size:13px;font-weight:600;">${rx.created_at?.slice(0,10)} — Dr. ${rx.doctor_name}</div><div style="font-size:13px;color:var(--primary);margin:4px 0;">Diagnosis: ${rx.diagnosis||'-'}</div>${meds.map(m=>`<div style="font-size:12px;padding:2px 0;">💊 ${m.name} ${m.dosage} — ${m.timing} × ${m.days} days</div>`).join('')}${rx.notes?`<div style="font-size:12px;color:var(--text-light);margin-top:4px;">📝 ${rx.notes}</div>`:''}</div>`;}).join('')}
-  </div></div>`:''}`;
+  ${(visits||[]).length>0?`<div class="section-card" style="margin-bottom:14px;">
+    <div class="section-header"><h3>👤 Visits (${visits.length})</h3></div>
+    <div class="section-body" style="overflow-x:auto;">
+      <table><tr><th>Date</th><th>Token</th><th>Disease</th><th>Doctor</th><th>Wait</th><th>Consult</th><th>Status</th></tr>
+      ${visits.map(p=>`<tr>
+        <td style="font-size:11px;">${p.created_at?.slice(0,10)||'-'}</td>
+        <td><strong>T-${String(p.token_number).padStart(3,'0')}</strong></td>
+        <td>${p.disease||'-'}</td>
+        <td style="font-size:11px;">${p.doctor||'-'}</td>
+        <td style="font-size:11px;">${p.waiting_minutes!=null?p.waiting_minutes+'m':'-'}</td>
+        <td style="font-size:11px;">${p.consultation_minutes!=null?p.consultation_minutes+'m':'-'}</td>
+        <td><span class="badge badge-${p.status}">${p.status}</span></td>
+      </tr>`).join('')}
+      </table>
+    </div>
+  </div>`:''}
+  ${(rxs||[]).length>0?`<div class="section-card">
+    <div class="section-header"><h3>📝 Prescriptions (${rxs.length})</h3></div>
+    <div class="section-body">
+      ${rxs.map(rx=>{let meds=[];try{meds=JSON.parse(rx.medicines||'[]')}catch(e){}return`<div style="border:1px solid var(--border);border-radius:8px;padding:11px;margin-bottom:9px;">
+        <div style="font-weight:600;font-size:12px;">${rx.created_at?.slice(0,10)} — Dr. ${rx.doctor_name}</div>
+        <div style="font-size:12px;color:var(--primary);margin:3px 0;">Dx: ${rx.diagnosis||'-'}</div>
+        ${meds.map(m=>`<div style="font-size:11px;padding:2px 0;">💊 ${m.name} ${m.dosage} — ${m.timing} × ${m.days}d</div>`).join('')}
+      </div>`;}).join('')}
+    </div>
+  </div>`:''}`;
+}
+// ══════════════════════════════════════════
+// WHATSAPP CENTER
+// ══════════════════════════════════════════
+function loadWhatsApp(){
+  const c=document.getElementById('mainContent');
+  c.innerHTML=`
+  <div class="section-card" style="margin-bottom:18px;">
+    <div class="section-header"><h3>📱 Send WhatsApp</h3></div>
+    <div class="section-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Mobile Number</label><input id="wa_to" placeholder="91XXXXXXXXXX"></div>
+        <div class="form-group"><label>Patient Name</label><input id="wa_name" placeholder="Patient name"></div>
+        <div class="form-group full"><label>Message</label><textarea id="wa_msg" rows="4" placeholder="Type message..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px;">
+        <button class="btn btn-outline btn-sm" onclick="setWATemplate('appt')">📅 Appointment</button>
+        <button class="btn btn-outline btn-sm" onclick="setWATemplate('reminder')">🔔 Reminder</button>
+        <button class="btn btn-outline btn-sm" onclick="setWATemplate('report')">📋 Report Ready</button>
+        <button class="btn btn-outline btn-sm" onclick="setWATemplate('vaccine')">💉 Vaccination</button>
+      </div>
+      <div id="waAlert" class="alert"></div>
+      <button class="btn btn-whatsapp" onclick="sendCustomWA()">📱 Send</button>
+    </div>
+  </div>
+  <div class="section-card">
+    <div class="section-header"><h3>📋 Message Log</h3></div>
+    <div class="section-body">
+      ${waLogs.length===0?'<p style="color:var(--text-light);font-size:13px;">No messages this session.</p>':
+      waLogs.map(w=>`<div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:10px;margin-bottom:8px;font-size:12px;">
+        <div style="font-weight:700;color:#1b5e20;">📱 ${w.to} <span style="background:${w.status==='sent'?'#d4edda':'#fce8e8'};color:${w.status==='sent'?'#155724':'#c0392b'};padding:1px 7px;border-radius:8px;font-size:10px;">${w.status==='sent'?'✅ Sent':'❌ Failed'}</span></div>
+        <div style="color:#2e7d32;margin-top:3px;white-space:pre-wrap;">${w.message.slice(0,100)}...</div>
+        <div style="font-size:10px;color:#66bb6a;margin-top:3px;">${w.time}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
 }
 
-// ── PATIENT SELF PORTAL ──
+function setWATemplate(t){
+  const name=document.getElementById('wa_name').value||'Patient';
+  const templates={appt:`🏥 *${currentUser?.phc}*\n\nவணக்கம் ${name}!\n\nஉங்கள் appointment confirm.\n📅 ${new Date().toLocaleDateString('ta-IN')}\n⏰ 9:00 AM\n\n${currentUser?.phc}`,reminder:`🏥 *${currentUser?.phc}*\n\nவணக்கம் ${name}!\n\n📅 Checkup reminder!\nPHC-ல் வாருங்கள்.\n\n${currentUser?.phc}`,report:`🏥 *${currentUser?.phc}*\n\nவணக்கம் ${name}!\n\n📋 Test report ready.\nPHC-ல் வந்து எடுத்துக்கொள்ளுங்கள்.\n\n${currentUser?.phc}`,vaccine:`🏥 *${currentUser?.phc}*\n\nவணக்கம் ${name}!\n\n💉 Vaccination due!\nPHC-ல் வாருங்கள்.\n\n${currentUser?.phc}`};
+  document.getElementById('wa_msg').value=templates[t]||'';
+}
+
+async function sendCustomWA(){
+  const to=document.getElementById('wa_to').value.trim();
+  const msg=document.getElementById('wa_msg').value.trim();
+  if(!to||!msg){showAlert('waAlert','error','Number and message required!');return;}
+  showAlert('waAlert','info','Sending...');
+  const ok=await sendWhatsApp(to,msg);
+  if(ok){showAlert('waAlert','success','✅ Sent!');loadWhatsApp();}
+  else showAlert('waAlert','error','❌ Failed. Check number.');
+}
+
+// ══════════════════════════════════════════
+// 3-MONTH FOLLOW-UP
+// ══════════════════════════════════════════
+async function send3MonthAlert(mobile,name){
+  const ok=await sendWhatsApp(mobile,`🏥 *PHC Follow-up Alert*\n\nவணக்கம் ${name}!\n\n3 மாதங்களாக PHC வரவில்லை.\n\nவேறு hospital-ல் treatment-ஆ?\n✅ YES\n❌ NO\n\nPHC-ல் வாருங்கள்.\n\n${currentUser?.phc||'Virudhunagar PHC'}`);
+  alert(ok?`✅ Alert sent to ${name}!`:`❌ Failed`);
+}
+async function sendAll3MonthAlerts(){
+  const cutoff=new Date(Date.now()-90*24*60*60*1000).toISOString();
+  const {data}=await db.from('patients').select('*').lt('created_at',cutoff).eq('status','done').not('mobile','is',null);
+  if(!data||data.length===0){alert('No patients');return;}
+  let sent=0;for(const p of data){if(p.mobile){await send3MonthAlert(p.mobile,p.name);sent++;}}
+  alert(`✅ Alerts sent to ${sent} patients!`);
+}
+
+// ══════════════════════════════════════════
+// PATIENT SELF PORTAL
+// ══════════════════════════════════════════
 async function loadMyHistory(){
   const c=document.getElementById('mainContent');
-  const {data:visits}=await db.from('patients').select('*').eq('mobile',currentUser.mobile||'').order('created_at',{ascending:false});
+  const {data}=await db.from('patients').select('*').eq('mobile',currentUser.mobile||'').order('created_at',{ascending:false});
   c.innerHTML=`<div class="section-card"><div class="section-header"><h3>📋 My Visit History</h3></div><div class="section-body">
-    ${(visits||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">No visit records found.</p>':
-    (visits||[]).map(v=>`<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;">
-      <div style="font-size:14px;font-weight:700;">T-${String(v.token_number).padStart(3,'0')} — ${v.disease||'General'}</div>
-      <div style="font-size:12px;color:var(--text-light);margin-top:4px;">📅 ${v.created_at?.slice(0,10)} · 🏥 ${v.phc} · 🩺 ${v.doctor||'-'}</div>
-      <span class="badge badge-${v.status}" style="margin-top:6px;">${v.status}</span>
+    ${(data||[]).length===0?'<p style="color:var(--text-light);">No records.</p>':
+    data.map(v=>`<div style="border:1px solid var(--border);border-radius:9px;padding:11px;margin-bottom:9px;">
+      <div style="font-weight:700;">T-${String(v.token_number).padStart(3,'0')} — ${v.disease||'General'}</div>
+      <div style="font-size:11px;color:var(--text-light);">📅 ${v.created_at?.slice(0,10)} · 🏥 ${v.phc}</div>
+      <span class="badge badge-${v.status}" style="margin-top:5px;">${v.status}</span>
     </div>`).join('')}
   </div></div>`;
 }
-
 async function loadMyPrescriptions(){
   const c=document.getElementById('mainContent');
-  const {data:rxs}=await db.from('prescriptions').select('*').eq('patient_mobile',currentUser.mobile||'').order('created_at',{ascending:false});
+  const {data}=await db.from('prescriptions').select('*').eq('patient_mobile',currentUser.mobile||'').order('created_at',{ascending:false});
   c.innerHTML=`<div class="section-card"><div class="section-header"><h3>📝 My Prescriptions</h3></div><div class="section-body">
-    ${(rxs||[]).length===0?'<p style="color:var(--text-light);font-size:13px;">No prescriptions found.</p>':
-    (rxs||[]).map(rx=>{let meds=[];try{meds=JSON.parse(rx.medicines||'[]')}catch(e){}return`<div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;">
-      <div style="font-size:14px;font-weight:700;">📅 ${rx.created_at?.slice(0,10)} — Dr. ${rx.doctor_name}</div>
-      <div style="font-size:13px;color:var(--primary);margin:6px 0;">Diagnosis: ${rx.diagnosis||'-'}</div>
-      ${meds.map(m=>`<div style="font-size:13px;padding:3px 0;border-bottom:1px solid var(--border);">💊 <strong>${m.name}</strong> ${m.dosage} — ${m.timing} × ${m.days} days</div>`).join('')}
-      ${rx.notes?`<div style="font-size:12px;color:var(--text-light);margin-top:8px;">📝 ${rx.notes}</div>`:''}
+    ${(data||[]).length===0?'<p style="color:var(--text-light);">No prescriptions.</p>':
+    data.map(rx=>{let meds=[];try{meds=JSON.parse(rx.medicines||'[]')}catch(e){}return`<div style="border:1px solid var(--border);border-radius:9px;padding:12px;margin-bottom:9px;">
+      <div style="font-weight:600;font-size:13px;">📅 ${rx.created_at?.slice(0,10)} — Dr. ${rx.doctor_name}</div>
+      <div style="font-size:12px;color:var(--primary);margin:4px 0;">Dx: ${rx.diagnosis||'-'}</div>
+      ${meds.map(m=>`<div style="font-size:12px;padding:2px 0;">💊 ${m.name} ${m.dosage} — ${m.timing} × ${m.days}d</div>`).join('')}
     </div>`;}).join('')}
   </div></div>`;
 }
-
 async function loadMyVaccination(){
   const c=document.getElementById('mainContent');
   c.innerHTML=`<div class="section-card"><div class="section-header"><h3>💉 Vaccination Schedule</h3></div><div class="section-body" style="overflow-x:auto;">
     <table><tr><th>Vaccine</th><th>Age</th><th>Disease</th></tr>
-    ${VACCINE_SCHEDULE.map(v=>`<tr><td><strong>${v.name}</strong></td><td><span class="badge badge-active">${v.age}</span></td><td style="font-size:12px;color:var(--text-light);">${v.disease}</td></tr>`).join('')}
+    ${VACCINES.map(v=>`<tr><td><strong>${v.name}</strong></td><td><span class="badge badge-active">${v.age}</span></td><td style="font-size:11px;">${v.disease}</td></tr>`).join('')}
     </table></div></div>`;
 }
 
-// ── 3-MONTH FOLLOW-UP ──
-async function send3MonthAlert(mobile,name){
-  const msg=`🏥 *Virudhunagar PHC - Follow-up Alert*\n\nவணக்கம் ${name}!\n\n3 மாதங்களுக்கும் மேலாக PHC-க்கு வரவில்லை.\n\nநீங்கள் வேறு hospital-ல் treatment எடுக்கிறீர்களா?\n\n✅ YES — வேறு hospital-ல்\n❌ NO — நிறுத்திவிட்டேன்\n\nதயவுசெய்து PHC-ல் வாருங்கள்.\n\n${currentUser?.phc||'Virudhunagar PHC'}`;
-  const ok=await sendWhatsApp(mobile,msg);
-  alert(ok?`✅ Follow-up alert sent to ${name}!`:`❌ Failed to send to ${name}`);
-}
-
-async function sendAll3MonthAlerts(){
-  const cutoff=new Date(Date.now()-90*24*60*60*1000).toISOString();
-  const {data}=await db.from('patients').select('*').lt('created_at',cutoff).eq('status','done').not('mobile','is',null);
-  if(!data||data.length===0){alert('No patients to alert');return;}
-  let sent=0;
-  for(const p of data){if(p.mobile){await send3MonthAlert(p.mobile,p.name);sent++;}}
-  alert(`✅ Follow-up alerts sent to ${sent} patients!`);
-}
-
-// ── HELPERS ──
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-function showAlert(id,type,msg){const el=document.getElementById(id);if(!el)return;el.className=`alert alert-${type}`;el.textContent=msg;el.style.display='block';}
-
 document.addEventListener('input',e=>{
-  if(e.target.id==='wa_msg'||e.target.id==='custom_msg'){
-    const prev=document.getElementById('wa_preview_text');
-    if(prev)prev.textContent=e.target.value;
-  }
+  if(e.target.id==='wa_msg'){const p=document.getElementById('wa_preview_text');if(p)p.textContent=e.target.value;}
 });
 </script>
 </body>
