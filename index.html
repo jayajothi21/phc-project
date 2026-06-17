@@ -10,20 +10,188 @@
   --primary:#1a6b3c;--primary-light:#2d9e5f;--primary-dark:#0f4a29;
   --accent:#f0a500;--danger:#e63946;--warning:#f4a261;--success:#2a9d8f;
   --bg:#f0f4f1;--text:#1a2e22;--text-light:#5a7a65;--border:#d0e4d8;--sidebar-w:250px;
+  --gov-green:#1a5c30;--gov-gold:#c8a415;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Poppins','Noto Sans Tamil',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-#loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,#0f4a29 0%,#1a6b3c 50%,#2d9e5f 100%);position:relative;overflow:hidden;}
-.login-box{background:white;border-radius:20px;padding:40px;width:440px;box-shadow:0 30px 80px rgba(0,0,0,.3);position:relative;z-index:1;}
-.login-logo{text-align:center;margin-bottom:24px;}
-.login-logo .emblem{width:64px;height:64px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 10px;}
-.login-logo h2{font-size:17px;font-weight:700;color:var(--primary);line-height:1.3;}
-.login-logo p{font-size:12px;color:var(--text-light);margin-top:3px;}
-.form-group{margin-bottom:14px;}
-.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px;}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:inherit;color:var(--text);background:#fafffe;outline:none;transition:border-color .2s;}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,107,60,.1);}
+
+/* ═══════════════════════════════
+   LOGIN PAGE — Government UI
+   ═══════════════════════════════ */
+#loginPage{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  background:#eef4f0;
+}
+
+.login-bg-overlay{
+  position:absolute;inset:0;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,0.93) 0%,rgba(255,255,255,0.78) 38%,rgba(255,255,255,0.6) 100%);
+  z-index:0;
+}
+
+.login-bg-pattern{
+  position:absolute;right:-60px;top:50%;transform:translateY(-50%);
+  width:420px;height:420px;
+  background:radial-gradient(circle at 60% 40%,rgba(26,107,60,0.08) 0%,transparent 70%);
+  z-index:0;
+}
+.login-bg-pattern::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='70' viewBox='0 0 60 70'%3E%3Cpolygon points='30,2 58,17 58,53 30,68 2,53 2,17' fill='none' stroke='rgba(26,107,60,0.12)' stroke-width='1.5'/%3E%3C/svg%3E") repeat;
+  opacity:0.7;
+}
+
+.login-left-accent{
+  position:absolute;left:0;top:0;bottom:0;width:42%;
+  background:linear-gradient(160deg,rgba(15,74,41,0.06) 0%,rgba(26,107,60,0.03) 100%);
+  clip-path:ellipse(80% 60% at 20% 50%);
+  z-index:0;
+}
+
+.login-wrap{
+  position:relative;z-index:1;
+  display:flex;align-items:center;justify-content:center;
+  width:100%;min-height:100vh;padding:24px;
+}
+
+.login-box{
+  background:rgba(255,255,255,0.97);
+  border-radius:18px;
+  padding:36px 40px 28px;
+  width:100%;max-width:480px;
+  box-shadow:0 8px 40px rgba(26,107,60,0.13),0 2px 12px rgba(0,0,0,0.08);
+  border:1px solid rgba(200,164,21,0.18);
+  position:relative;
+}
+
+.login-box::before{
+  content:'';position:absolute;top:0;left:20px;right:20px;height:3px;
+  background:linear-gradient(90deg,transparent,var(--gov-gold),transparent);
+  border-radius:0 0 3px 3px;
+}
+
+.gov-header{
+  text-align:center;
+  padding-bottom:18px;
+  border-bottom:1px solid rgba(200,164,21,0.25);
+  margin-bottom:18px;
+}
+
+.gov-emblem{
+  width:72px;height:72px;
+  background:linear-gradient(135deg,#1a5c30,#2d8c50);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;
+  margin:0 auto 10px;
+  box-shadow:0 4px 16px rgba(26,92,48,0.25),0 0 0 3px rgba(200,164,21,0.25);
+  border:2px solid rgba(200,164,21,0.4);
+}
+
+.gov-title-ta{
+  font-size:19px;font-weight:700;
+  color:var(--gov-green);
+  font-family:'Noto Sans Tamil','Poppins',sans-serif;
+  letter-spacing:0.3px;
+  line-height:1.3;
+}
+
+.gov-dept-ta{
+  font-size:12px;color:#5a7a65;margin-top:4px;
+  font-family:'Noto Sans Tamil','Poppins',sans-serif;
+}
+
+.gov-divider{
+  display:flex;align-items:center;gap:8px;margin:10px 0;
+}
+.gov-divider::before,.gov-divider::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(200,164,21,0.4),transparent);
+}
+.gov-divider span{font-size:9px;color:var(--gov-gold);letter-spacing:2px;font-weight:700;text-transform:uppercase;}
+
+.login-module-title{
+  font-size:16px;font-weight:700;color:var(--gov-green);text-align:center;margin-bottom:3px;
+  font-family:'Noto Sans Tamil','Poppins',sans-serif;
+}
+.login-module-sub{
+  font-size:10px;color:#888;text-align:center;letter-spacing:2px;text-transform:uppercase;margin-bottom:0;
+}
+
+.form-group{margin-bottom:13px;}
+.form-group label{display:block;font-size:12px;font-weight:600;color:#2d4a35;margin-bottom:5px;letter-spacing:0.2px;}
+.field-wrap{position:relative;}
+.field-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.6;pointer-events:none;}
+.form-group input,.form-group select,.form-group textarea{
+  width:100%;padding:10px 13px;
+  border:1.5px solid #d0e4d8;border-radius:9px;
+  font-size:13px;font-family:inherit;color:var(--text);
+  background:#fafffe;outline:none;transition:border-color .2s,box-shadow .2s;
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{
+  border-color:var(--gov-green);box-shadow:0 0 0 3px rgba(26,92,48,0.1);
+}
+.login-box .form-group input{padding:10px 13px 10px 36px;}
+
+.accounts-box{
+  background:linear-gradient(135deg,#f0f8f4,#e8f5ee);
+  border:1px solid rgba(26,107,60,0.18);
+  border-radius:10px;padding:11px 13px;
+  margin-bottom:14px;font-size:11px;color:#3a5a45;
+}
+.accounts-box strong{color:var(--gov-green);font-size:11px;display:block;margin-bottom:6px;font-weight:700;}
+.accounts-box div{padding:2px 0;display:flex;align-items:center;gap:5px;}
+
+.btn-login{
+  width:100%;padding:13px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#1a5c30,#2d9e5f);
+  color:white;font-size:14px;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:all .25s;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  letter-spacing:0.3px;
+  box-shadow:0 4px 14px rgba(26,92,48,0.3);
+}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,92,48,0.38);}
+.btn-login:active{transform:translateY(0);}
+.btn-login:disabled{opacity:0.7;cursor:default;transform:none;}
+
+.login-footer-bar{
+  background:linear-gradient(90deg,#0f3d1e,#1a5c30,#0f3d1e);
+  color:rgba(255,255,255,0.85);
+  text-align:center;font-size:11px;
+  padding:12px 20px;width:100%;
+  position:fixed;bottom:0;left:0;
+  display:flex;align-items:center;justify-content:center;gap:32px;
+  border-top:2px solid rgba(200,164,21,0.4);
+  flex-wrap:wrap;
+}
+.footer-item{display:flex;align-items:center;gap:6px;font-size:11px;}
+.footer-item span:first-child{font-size:14px;}
+.footer-divider{width:1px;height:14px;background:rgba(255,255,255,0.2);}
+
+.health-motto{
+  text-align:center;margin-top:14px;padding-top:12px;
+  border-top:1px dashed rgba(26,107,60,0.2);
+}
+.health-motto .ta{font-size:11px;color:var(--gov-green);font-weight:600;font-family:'Noto Sans Tamil','Poppins',sans-serif;}
+.health-motto .en{font-size:10px;color:#888;font-style:italic;margin-top:2px;}
+.motto-shield{font-size:18px;margin-bottom:3px;}
+
+#loginError{background:#ffe8e8;color:var(--danger);padding:9px 13px;border-radius:8px;font-size:12px;margin-top:10px;display:none;}
+
+@media (max-width:560px){
+  .login-box{padding:28px 22px 22px;}
+  .login-footer-bar{gap:14px;padding:10px 12px;}
+  .footer-item span:nth-child(2){font-size:10px;}
+}
+
+/* ═══════════════════════════════
+   APP LAYOUT (unchanged structure)
+   ═══════════════════════════════ */
 .btn{padding:10px 18px;border:none;border-radius:9px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
 .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;width:100%;justify-content:center;padding:12px;font-size:14px;}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(26,107,60,.3);}
@@ -134,32 +302,71 @@ tr:hover td{background:#fafffe;}
 </head>
 <body>
 
-<!-- LOGIN PAGE -->
+<!-- LOGIN PAGE — New Government Design -->
 <div id="loginPage">
-  <div class="login-box">
-    <div class="login-logo">
-      <div class="emblem">🏥</div>
-      
-      <p>தமிழ்நாடு முதன்மை சுகாதார மைய மேலாண்மை அமைப்பு</p>
+  <div class="login-bg-overlay"></div>
+  <div class="login-bg-pattern"></div>
+  <div class="login-left-accent"></div>
+
+  <div class="login-wrap">
+    <div class="login-box">
+      <!-- Government Header -->
+      <div class="gov-header">
+        <div class="gov-emblem">🏛️</div>
+        <div class="gov-title-ta">தமிழ்நாடு அரசு</div>
+        <div class="gov-dept-ta">ஆரம்ப சுகாதார நிலைய மேலாண்மை அமைப்பு</div>
+        <div class="gov-divider"><span>✦</span></div>
+        <div class="login-module-title">PHC மேலாண்மை அமைப்பு</div>
+        <div class="login-module-sub">PHC Management System</div>
+      </div>
+
+      <!-- Login Fields -->
+      <div class="form-group">
+        <label>Email Address</label>
+        <div class="field-wrap">
+          <span class="field-icon">✉️</span>
+          <input type="email" id="loginEmail" placeholder="your@email.com" value="staff@phc.com">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="field-wrap">
+          <span class="field-icon">🔒</span>
+          <input type="password" id="loginPassword" placeholder="••••••••" value="staff123" onkeydown="if(event.key==='Enter')handleLogin()">
+        </div>
+      </div>
+
+      <!-- Accounts Box -->
+      <div class="accounts-box">
+        <strong>🏛 Login Accounts:</strong>
+        <div><span>🏛</span><span>District: admin@district.com / admin123</span></div>
+        <div><span>🩺</span><span>Doctor: doctor@phc.com / doctor123</span></div>
+        <div><span>👤</span><span>Staff: staff@phc.com / staff123</span></div>
+        <div><span>🤰</span><span>ANM: anm@phc.com / anm123</span></div>
+        <div><span>💊</span><span>Pharmacist: pharma@phc.com / pharma123</span></div>
+      </div>
+
+      <button class="btn-login" id="loginBtn" onclick="handleLogin()">
+        🔐 Login to System
+      </button>
+      <div id="loginError"></div>
+
+      <!-- Health Motto -->
+      <div class="health-motto">
+        <div class="motto-shield">🛡️</div>
+        <div class="ta">சுகாதாரம் என்பது செல்வம்</div>
+        <div class="en">— Good Health is True Wealth —</div>
+      </div>
     </div>
-    <div class="form-group">
-      <label>Email Address</label>
-      <input type="email" id="loginEmail" placeholder="your@email.com" value="staff@phc.com">
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="loginPassword" placeholder="••••••••" value="staff123" onkeydown="if(event.key==='Enter')handleLogin()">
-    </div>
-    <div style="background:#f0f8f4;border-radius:9px;padding:11px;margin-bottom:14px;font-size:11px;color:var(--text-light);">
-      <strong style="color:var(--primary);">Login Accounts:</strong><br>
-      🏛 District Admin: admin@district.com / admin123<br>
-      🩺 Doctor: doctor@phc.com / doctor123<br>
-      👤 Staff: staff@phc.com / staff123<br>
-      🤰 ANM: anm@phc.com / anm123<br>
-      💊 Pharmacist: pharma@phc.com / pharma123
-    </div>
-    <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">🔐 Login to System</button>
-    <div id="loginError" style="background:#ffe8e8;color:var(--danger);padding:9px 13px;border-radius:8px;font-size:12px;margin-top:10px;display:none;"></div>
+  </div>
+
+  <!-- Footer Bar -->
+  <div class="login-footer-bar">
+    <div class="footer-item"><span>👥</span><span>மக்கள் சேவை</span></div>
+    <div class="footer-divider"></div>
+    <div class="footer-item"><span>🩺</span><span>தரமான சிகிச்சை</span></div>
+    <div class="footer-divider"></div>
+    <div class="footer-item"><span>💚</span><span>சுகாதாரமான தமிழ்நாடு</span></div>
   </div>
 </div>
 
@@ -833,7 +1040,6 @@ async function savePrescription(sendToPharm){
   _rxSaving=true;
   showAlert('rxAlert','info','Saving...');
 
-  // Extract token number if patient field looks like "T-001" or contains it
   let patientToken='';
   const tokenMatch=patient.match(/T-?\d+/i);
   if(tokenMatch)patientToken=tokenMatch[0].toUpperCase().replace(/^T-?/,'T-');
@@ -1223,9 +1429,6 @@ async function loadAllPHCs(){
   </div>`;
 }
 
-// ══════════════════════════════════════════
-// DISTRICT ADMIN — DISTRICT & PHC SELECTOR
-// ══════════════════════════════════════════
 function loadPHCSelector(){
   const c=document.getElementById('mainContent');
   c.innerHTML=`
@@ -1254,20 +1457,9 @@ function loadPHCSelector(){
   </div>`;
 }
 
-function selectDistrict(d){
-  selectedDistrict=d;
-  selectedPHC=null;
-  loadPHCSelector();
-}
+function selectDistrict(d){selectedDistrict=d;selectedPHC=null;loadPHCSelector();}
+function selectPHC(phc){selectedPHC=phc;navigateTo('phc_performance');}
 
-function selectPHC(phc){
-  selectedPHC=phc;
-  navigateTo('phc_performance');
-}
-
-// ══════════════════════════════════════════
-// DISTRICT ADMIN — PHC PERFORMANCE DASHBOARD
-// ══════════════════════════════════════════
 async function loadPHCPerformance(){
   const c=document.getElementById('mainContent');
   if(!selectedPHC){
@@ -1327,7 +1519,6 @@ async function loadPHCPerformance(){
       </div>
     </div>
   </div>
-
   <div class="section-card" style="margin-bottom:18px;">
     <div class="section-header"><h3>📅 Staff Attendance — Today</h3></div>
     <div class="section-body" style="overflow-x:auto;">
@@ -1342,7 +1533,6 @@ async function loadPHCPerformance(){
       </table>`}
     </div>
   </div>
-
   <div class="section-card" style="margin-bottom:18px;">
     <div class="section-header"><h3>💊 Medicine Stock Summary</h3></div>
     <div class="section-body" style="overflow-x:auto;">
@@ -1356,7 +1546,6 @@ async function loadPHCPerformance(){
       </table>`}
     </div>
   </div>
-
   <div class="section-card" style="margin-bottom:18px;">
     <div class="section-header"><h3>🤰 Pregnancy Cases</h3></div>
     <div class="section-body" style="overflow-x:auto;">
@@ -1369,7 +1558,6 @@ async function loadPHCPerformance(){
       </table>`}
     </div>
   </div>
-
   <div class="section-card">
     <div class="section-header"><h3>💉 Vaccination — National Schedule (Reference)</h3></div>
     <div class="section-body" style="overflow-x:auto;">
@@ -1380,7 +1568,6 @@ async function loadPHCPerformance(){
     </div>
   </div>`;
 }
-
 
 async function loadAllPatients(){
   const c=document.getElementById('mainContent');
@@ -1433,9 +1620,6 @@ async function loadAllStaff(){
   </div>`;
 }
 
-// ══════════════════════════════════════════
-// REPORTS
-// ══════════════════════════════════════════
 async function loadReports(){
   const c=document.getElementById('mainContent');
   c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
@@ -1478,9 +1662,6 @@ async function loadReports(){
   </div>`;
 }
 
-// ══════════════════════════════════════════
-// AUDIT LOG
-// ══════════════════════════════════════════
 async function loadAudit(){
   const c=document.getElementById('mainContent');
   c.innerHTML='<div class="loading"><div class="spinner"></div></div>';
@@ -1502,9 +1683,6 @@ async function loadAudit(){
   </div>`;
 }
 
-// ══════════════════════════════════════════
-// PATIENT HISTORY (DOCTOR)
-// ══════════════════════════════════════════
 async function loadPatHistory(){
   const c=document.getElementById('mainContent');
   c.innerHTML=`<div class="section-card"><div class="section-header"><h3>📂 Patient History Search</h3></div><div class="section-body">
@@ -1553,9 +1731,7 @@ async function searchHistory(){
     </div>
   </div>`:''}`;
 }
-// ══════════════════════════════════════════
-// WHATSAPP CENTER
-// ══════════════════════════════════════════
+
 function loadWhatsApp(){
   const c=document.getElementById('mainContent');
   c.innerHTML=`
@@ -1606,9 +1782,6 @@ async function sendCustomWA(){
   else showAlert('waAlert','error','❌ Failed. Check number.');
 }
 
-// ══════════════════════════════════════════
-// 3-MONTH FOLLOW-UP
-// ══════════════════════════════════════════
 async function send3MonthAlert(mobile,name){
   const ok=await sendWhatsApp(mobile,`🏥 *PHC Follow-up Alert*\n\nவணக்கம் ${name}!\n\n3 மாதங்களாக PHC வரவில்லை.\n\nவேறு hospital-ல் treatment-ஆ?\n✅ YES\n❌ NO\n\nPHC-ல் வாருங்கள்.\n\n${currentUser?.phc||'Virudhunagar PHC'}`);
   alert(ok?`✅ Alert sent to ${name}!`:`❌ Failed`);
@@ -1621,9 +1794,6 @@ async function sendAll3MonthAlerts(){
   alert(`✅ Alerts sent to ${sent} patients!`);
 }
 
-// ══════════════════════════════════════════
-// PATIENT SELF PORTAL
-// ══════════════════════════════════════════
 async function loadMyHistory(){
   const c=document.getElementById('mainContent');
   const {data}=await db.from('patients').select('*').eq('mobile',currentUser.mobile||'').order('created_at',{ascending:false});
