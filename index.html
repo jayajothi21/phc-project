@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -32,16 +32,8 @@ body{font-family:'Poppins','Noto Sans Tamil',sans-serif;background:var(--bg);col
 
 /* background layers */
 .login-bg-wash{
-  position:absolute;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  background:linear-gradient(
-    120deg,
-    rgba(255,255,255,0.6) 0%,
-    rgba(234,242,251,0.55) 45%,
-    rgba(255,255,255,0.55) 100%
-  );
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(120deg,rgba(255,255,255,0.6) 0%,rgba(234,242,251,0.55) 45%,rgba(255,255,255,0.55) 100%);
 }
 .login-bg-pattern{
   position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0.45;
@@ -54,27 +46,14 @@ body{font-family:'Poppins','Noto Sans Tamil',sans-serif;background:var(--bg);col
   mask-image:linear-gradient(to left,rgba(0,0,0,1) 40%,rgba(0,0,0,0) 100%);
 }
 .bg-icons-right{
-    position:absolute;
-    top:0;
-    right:0;
-    width:700px;
-    height:800px;
-    opacity:0.8;
-    background:url("stethoscope.png") no-repeat;
-    background-size:contain;
-    background-position:center right;
-
+  position:absolute;top:6%;right:2%;width:300px;height:460px;max-width:42%;z-index:0;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='460' viewBox='0 0 300 460'%3E%3Cline x1='150' y1='40' x2='150' y2='300' stroke='rgb(29,63,143)' stroke-width='4' stroke-opacity='0.16'/%3E%3Cpath d='M150,55 C110,30 70,45 60,75 C95,70 125,75 150,90' fill='none' stroke='rgb(29,63,143)' stroke-width='3' stroke-opacity='0.16'/%3E%3Cpath d='M150,55 C190,30 230,45 240,75 C205,70 175,75 150,90' fill='none' stroke='rgb(29,63,143)' stroke-width='3' stroke-opacity='0.16'/%3E%3Cpath d='M150,70 C110,100 190,130 150,160 C110,190 190,220 150,250 C120,270 175,285 150,300' fill='none' stroke='rgb(47,111,237)' stroke-width='3' stroke-opacity='0.2'/%3E%3Cpath d='M150,70 C190,100 110,130 150,160 C190,190 110,220 150,250 C180,270 125,285 150,300' fill='none' stroke='rgb(47,111,237)' stroke-width='3' stroke-opacity='0.2'/%3E%3Cpolyline points='10,380 70,380 85,348 102,412 117,362 132,380 290,380' fill='none' stroke='rgb(29,63,143)' stroke-width='3' stroke-opacity='0.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M225,328 C225,317 241,310 252,307 C263,310 279,317 279,328 C279,355 263,372 252,380 C241,372 225,355 225,328 Z' fill='none' stroke='rgb(31,138,76)' stroke-width='3' stroke-opacity='0.22'/%3E%3Cline x1='252' y1='320' x2='252' y2='350' stroke='rgb(31,138,76)' stroke-width='3' stroke-opacity='0.22'/%3E%3Cline x1='237' y1='335' x2='267' y2='335' stroke='rgb(31,138,76)' stroke-width='3' stroke-opacity='0.22'/%3E%3C/svg%3E") no-repeat;
+  background-size:contain;background-position:top right;
 }
 .bg-photo-left{
-    position:absolute;
-    left:0;
-    bottom:0;
-    width:700px;
-    height:600px;
-    opacity:0.8;
-    background:url("hospital.png") no-repeat;
-    background-size:contain;
-    background-position:left bottom;
+  position:absolute;left:0;bottom:0;width:480px;max-width:42%;height:420px;z-index:0;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='420' viewBox='0 0 480 420'%3E%3Cline x1='0' y1='400' x2='480' y2='400' stroke='rgb(185,204,233)' stroke-width='3'/%3E%3Cpath d='M50,400 C44,350 50,300 60,255' stroke='rgb(156,122,82)' stroke-width='9' fill='none' stroke-linecap='round'/%3E%3Cg transform='translate(60,255)'%3E%3Cellipse cx='0' cy='-6' rx='34' ry='10' fill='rgb(111,174,138)' transform='rotate(0)'/%3E%3Cellipse cx='0' cy='-6' rx='34' ry='10' fill='rgb(111,174,138)' transform='rotate(45)'/%3E%3Cellipse cx='0' cy='-6' rx='34' ry='10' fill='rgb(111,174,138)' transform='rotate(90)'/%3E%3Cellipse cx='0' cy='-6' rx='34' ry='10' fill='rgb(111,174,138)' transform='rotate(135)'/%3E%3Cellipse cx='0' cy='-6' rx='34' ry='10' fill='rgb(111,174,138)' transform='rotate(180)'/%3E%3Cellipse cx='0' cy='-6' rx='34' ry='10' fill='rgb(111,174,138)' transform='rotate(225)'/%3E%3C/g%3E%3Cpath d='M105,400 C100,360 104,325 112,295' stroke='rgb(156,122,82)' stroke-width='7' fill='none' stroke-linecap='round'/%3E%3Cg transform='translate(112,295) scale(0.8)'%3E%3Cellipse cx='0' cy='-6' rx='34' ry='10' fill='rgb(130,190,155)' transform='rotate(10)'/%3E%3Cellipse cx='0' cy='-6' rx='34' ry='10' fill='rgb(130,190,155)' transform='rotate(60)'/%3E%3Cellipse cx='0' cy='-6' rx='34' ry='10' fill='rgb(130,190,155)' transform='rotate(110)'/%3E%3Cellipse cx='0' cy='-6' rx='34' ry='10' fill='rgb(130,190,155)' transform='rotate(160)'/%3E%3Cellipse cx='0' cy='-6' rx='34' ry='10' fill='rgb(130,190,155)' transform='rotate(210)'/%3E%3C/g%3E%3Crect x='150' y='190' width='260' height='150' fill='rgb(219,231,251)' stroke='rgb(29,63,143)' stroke-width='2'/%3E%3Crect x='140' y='176' width='280' height='16' rx='2' fill='rgb(47,111,237)'/%3E%3Crect x='175' y='215' width='32' height='32' fill='white' stroke='rgb(29,63,143)' stroke-width='2'/%3E%3Crect x='255' y='215' width='32' height='32' fill='white' stroke='rgb(29,63,143)' stroke-width='2'/%3E%3Crect x='335' y='215' width='32' height='32' fill='white' stroke='rgb(29,63,143)' stroke-width='2'/%3E%3Crect x='378' y='270' width='28' height='70' rx='2' fill='rgb(47,111,237)' opacity='0.6'/%3E%3Crect x='112' y='130' width='340' height='42' rx='6' fill='white' stroke='rgb(47,111,237)' stroke-width='2'/%3E%3Ctext x='282' y='149' font-size='13' font-weight='700' fill='rgb(29,63,143)' text-anchor='middle' font-family='sans-serif'%3E%E0%AE%86%E0%AE%B0%E0%AE%AE%E0%AF%8D%E0%AE%AA%20%E0%AE%9A%E0%AF%81%E0%AE%95%E0%AE%BE%E0%AE%A4%E0%AE%BE%E0%AE%B0%20%E0%AE%A8%E0%AE%BF%E0%AE%B2%E0%AF%88%E0%AE%AF%E0%AE%AE%E0%AF%8D%3C/text%3E%3Ctext x='282' y='164' font-size='9' font-weight='600' fill='rgb(47,111,237)' text-anchor='middle' letter-spacing='1' font-family='sans-serif'%3EPRIMARY%20HEALTH%20CENTRE%3C/text%3E%3C/svg%3E") no-repeat;
+  background-size:contain;background-position:left bottom;
 }
 
 .login-wrap{
@@ -85,75 +64,27 @@ body{font-family:'Poppins','Noto Sans Tamil',sans-serif;background:var(--bg);col
 
 /* Top header: TN emblem + dept text + separator + PHC emblem */
 .top-header{
-  display:flex;align-items:center;justify-content:center;gap:30px;
-  padding-top:25px;margin-bottom:20px;flex-wrap:wrap;
+  display:flex;align-items:center;justify-content:center;gap:20px;
+  padding-top:38px;margin-bottom:20px;flex-wrap:wrap;
   animation:fadeSlideUp .55s ease both;
 }
 .emblem-circle{
-  width:100px;
-  height:100px;
-  border-radius:50%;
-  flex-shrink:0;
-  background:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 8px 22px rgba(29,63,143,0.22);
-  border:3px solid var(--gov-gold);
-  font-size:42px;
+  width:80px;height:80px;border-radius:50%;flex-shrink:0;
+  background:#fff;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 18px rgba(29,63,143,0.18);
+  border:3px solid var(--gov-gold);font-size:34px;
   transition:transform .3s ease,box-shadow .3s ease;
 }
+.emblem-circle:hover{transform:translateY(-3px) scale(1.05);box-shadow:0 10px 24px rgba(29,63,143,0.26);}
+.gov-text{text-align:left;}
+.gov-text .gov-name{font-size:18px;font-weight:800;color:var(--text);font-family:'Noto Sans Tamil','Poppins',sans-serif;}
+.gov-text .gov-dept{font-size:10.5px;color:var(--ref-green);font-weight:600;margin-top:2px;font-family:'Noto Sans Tamil','Poppins',sans-serif;}
+.header-sep{width:1px;height:44px;background:rgba(29,63,143,0.18);}
+.emblem-circle.phc-emblem{flex-direction:column;border-color:var(--ref-green);gap:1px;padding:0 7px;}
+.phc-cross{font-size:24px;color:var(--ref-green);line-height:1;}
+.phc-label{font-size:9px;font-weight:800;color:var(--ref-navy);letter-spacing:.5px;line-height:1;}
+.phc-sub{font-size:4.3px;font-weight:700;color:var(--ref-green);letter-spacing:.2px;text-align:center;line-height:1.1;}
 
-.gov-text .gov-name{
-  font-size:22px;
-  font-weight:800;
-  color:var(--text);
-  font-family:'Noto Sans Tamil','Poppins',sans-serif;
-}
-
-.gov-text .gov-dept{
-  font-size:13px;
-  color:var(--ref-green);
-  font-weight:600;
-  margin-top:3px;
-  font-family:'Noto Sans Tamil','Poppins',sans-serif;
-}
-
-.header-sep{
-  width:2px;
-  height:55px;
-  background:rgba(29,63,143,0.22);
-}
-
-.emblem-circle.phc-emblem{
-  flex-direction:column;
-  border-color:var(--ref-green);
-  gap:2px;
-  padding:0 8px;
-}
-
-.phc-cross{
-  font-size:30px;
-  color:var(--ref-green);
-  line-height:1;
-}
-
-.phc-label{
-  font-size:11px;
-  font-weight:800;
-  color:var(--ref-navy);
-  letter-spacing:.5px;
-  line-height:1;
-}
-
-.phc-sub{
-  font-size:5.5px;
-  font-weight:700;
-  color:var(--ref-green);
-  letter-spacing:.2px;
-  text-align:center;
-  line-height:1.1;
-}
 /* Hero title */
 .hero-title{
   text-align:center;max-width:760px;margin:0 auto 28px;
@@ -163,8 +94,8 @@ body{font-family:'Poppins','Noto Sans Tamil',sans-serif;background:var(--bg);col
   font-family:'Noto Sans Tamil','Poppins',sans-serif;
   font-weight:800;color:var(--ref-navy);line-height:1.25;
 }
-.title-line1{font-size:40px;}
-.title-line2{font-size:35px;margin-top:2px;}
+.title-line1{font-size:32px;}
+.title-line2{font-size:28px;margin-top:2px;}
 .title-divider{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;flex-wrap:wrap;}
 .title-divider .plus{color:var(--ref-green);font-size:14px;}
 .title-divider .dline{flex:0 0 60px;height:1px;background:rgba(31,138,76,0.4);}
@@ -172,8 +103,13 @@ body{font-family:'Poppins','Noto Sans Tamil',sans-serif;background:var(--bg);col
 
 /* Login card */
 .login-box{
-    background:rgba(255,255,255,0.95);
-    backdrop-filter:blur(6px);
+  background:#fff;border-radius:22px;
+  padding:32px 36px 28px;
+  width:100%;max-width:460px;
+  box-shadow:0 16px 50px rgba(29,63,143,0.18),0 4px 14px rgba(0,0,0,0.06);
+  position:relative;
+  transition:transform .3s ease,box-shadow .3s ease;
+  animation:fadeSlideUp .55s ease .16s both;
 }
 .login-box:hover{transform:translateY(-2px);box-shadow:0 20px 60px rgba(29,63,143,0.22),0 6px 18px rgba(0,0,0,0.08);}
 
