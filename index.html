@@ -508,6 +508,15 @@ async function handleLogin(){
       if(pd&&pd.length>0){const p=pd[0];currentUser={name:p.name,role:'patient',phc:p.phc,mobile:email,id:p.id};showApp();navigateTo('myhistory');return;}
       errEl.textContent='❌ Invalid email or password!';errEl.style.display='block';return;
     }
+    // Normalize role: treat any admin-like role label as district_admin so the
+    // full district dashboard/nav shows up even if the DB row uses a shorthand
+    // like 'ddhs', 'admin', 'ddhs_admin', etc. Also clear phc for admins so
+    // district-wide views (which check phc==null) work without extra SQL.
+    const ADMIN_ROLE_ALIASES=['ddhs','admin','ddhs_admin','deputy_admin','district','districtadmin'];
+    if(data.role && ADMIN_ROLE_ALIASES.includes(String(data.role).toLowerCase())){
+      data.role='district_admin';
+      data.phc=null;
+    }
     let distanceFromPHC=null,locationStatus='location_off',gpsNote='';
     if(data.role!=='district_admin'){
       btn.textContent='📍 Getting location...';
